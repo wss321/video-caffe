@@ -26,6 +26,11 @@ class DataTransformer {
   void InitRand();
 
   /**
+   * @brief Set the Random number generations given seed
+   */
+  void SetRandFromSeed(const unsigned int rng_seed);
+
+  /**
    * @brief Applies the transformation defined in the data layer's
    * transform_param block to the data.
    *
@@ -60,9 +65,14 @@ class DataTransformer {
    * @param transformed_blob
    *    This is destination blob. It can be part of top blob's data if
    *    set_cpu_data() is used. See memory_layer.cpp for an example.
+   * @param is_video
+   *    A flag to specify if the given mat_vector should be treated as
+   *    consecutive video frames (shape=[1, channels, N, w, h]), rather
+   *    than a batch of images (shape=[N, channels, w, h]).
    */
   void Transform(const vector<cv::Mat> & mat_vector,
-                Blob<Dtype>* transformed_blob);
+                Blob<Dtype>* transformed_blob,
+                const bool is_video = false);
 
   /**
    * @brief Applies the transformation defined in the data layer's
@@ -73,8 +83,46 @@ class DataTransformer {
    * @param transformed_blob
    *    This is destination blob. It can be part of top blob's data if
    *    set_cpu_data() is used. See image_data_layer.cpp for an example.
+   * @param is_video
+   *    A flag to reuse same random seed to replicate croppings/mirrorings and
+   *    data augmentations for images within a same video clip
+   * @param frame
+   *    If is_video is enabled, frame refers to the frame index within a video
+   *    clip (usually 0~15).
+   * @param rand_mirror
+   *    If is_video is enabled, rand_mirror is whether image frames within a
+   *    video clip will be flipped.
+   * @param rand_h_off
+   *    If is_video is enabled, this is crop position in y for image frames
+   *    within a video clip will be flipped.
+   * @param rand_w_off
+   *    If is_video is enabled, this is crop position in x for image frames
+   *    within a video clip will be flipped.
    */
-  void Transform(const cv::Mat& cv_img, Blob<Dtype>* transformed_blob);
+  void Transform(const cv::Mat& cv_img,
+                  Blob<Dtype>* transformed_blob,
+                  const bool is_video = false,
+                  const int frame = 0,
+                  const bool rand_mirror = false,
+                  const int rand_h_off = 0,
+                  const int rand_w_off = 0);
+
+  /**
+   * @brief Applies the transformation defined in the data layer's
+   * transform_param block to a pair of cv::Mat.
+   * Ignores mean subtraction for second cv::Mat
+   * Useful for an (image, label) pair
+   * Appends seg as last channel of image
+   *
+   * @param cv_img
+   *    1-channel cv::Mat containing the data to be transformed.
+   * @param transformed_blob
+   *    This is destination blob. It can be part of top blob's data if
+   *    set_cpu_data() is used. See image_seg_data_layer.cpp for an example.
+   */
+  void TransformImageSeg(const cv::Mat& cv_img, const cv::Mat & cv_seg,
+      Blob<Dtype>* transformed_data);
+  // ------------------------------------------------------------------
 #endif  // USE_OPENCV
 
   /**
@@ -114,9 +162,14 @@ class DataTransformer {
    *
    * @param mat_vector
    *    A vector of Mat containing the data to be transformed.
+   * @param is_video
+   *    A flag to specify if the given mat_vector should be treated as
+   *    consecutive video frames (shape=[1, channels, N, w, h]), rather
+   *    than a batch of images (shape=[N, channels, w, h]).
    */
 #ifdef USE_OPENCV
-  vector<int> InferBlobShape(const vector<cv::Mat> & mat_vector);
+  vector<int> InferBlobShape(const vector<cv::Mat> & mat_vector,
+                             const bool is_video = false);
   /**
    * @brief Infers the shape of transformed_blob will have when
    *    the transformation is applied to the data.

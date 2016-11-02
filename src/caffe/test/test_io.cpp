@@ -1,10 +1,15 @@
 #ifdef USE_OPENCV
 #include <opencv2/core/core.hpp>
+#include <opencv2/core/version.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/highgui/highgui_c.h>
 #include <opencv2/imgproc/imgproc.hpp>
+#if CV_MAJOR_VERSION == 3
+#include <opencv2/videoio/videoio.hpp>
+#endif
 
 #include <string>
+#include <vector>
 
 #include "gtest/gtest.h"
 
@@ -418,6 +423,110 @@ TEST_F(IOTest, TestDecodeDatumToCVMatContentNative) {
       }
     }
   }
+}
+
+TEST_F(IOTest, TestReadVideoToCVMatBasic) {
+  string path = CMAKE_SOURCE_DIR \
+                "caffe/test/test_data/youtube_objects_dog_v0002_s006";
+  std::vector<cv::Mat> cv_imgs;
+  bool read_video_result = ReadVideoToCVMat(path,
+                                            1,     // start frame
+                                            16,    // length (# frames)
+                                            0,     // new height
+                                            0,     // new width
+                                            true,  // load as color
+                                            &cv_imgs);
+  EXPECT_EQ(read_video_result, true);
+  EXPECT_EQ(cv_imgs.size(), 16);
+  EXPECT_EQ(cv_imgs[0].channels(), 3);
+  EXPECT_EQ(cv_imgs[0].rows, 720);
+  EXPECT_EQ(cv_imgs[0].cols, 1280);
+}
+
+TEST_F(IOTest, TestReadVideoToCVMatNotEnoughFrames) {
+  string path = CMAKE_SOURCE_DIR \
+                "caffe/test/test_data/youtube_objects_dog_v0002_s006";
+  std::vector<cv::Mat> cv_imgs;
+  bool read_video_result = ReadVideoToCVMat(path,
+                                            2,     // start frame
+                                            16,    // length (# frames)
+                                            0,     // new height
+                                            0,     // new width
+                                            true,  // load as color
+                                            &cv_imgs);
+  EXPECT_EQ(read_video_result, false);   // because there are only 16 frames
+}
+
+TEST_F(IOTest, TestReadVideoToCVMatResize) {
+  string path = CMAKE_SOURCE_DIR \
+                "caffe/test/test_data/youtube_objects_dog_v0002_s006";
+  std::vector<cv::Mat> cv_imgs;
+  bool read_video_result = ReadVideoToCVMat(path,
+                                            1,     // start frame
+                                            16,    // length (# frames)
+                                            80,    // new height
+                                            100,   // new width
+                                            true,  // load as color
+                                            &cv_imgs);
+  EXPECT_EQ(read_video_result, true);
+  EXPECT_EQ(cv_imgs.size(), 16);
+  EXPECT_EQ(cv_imgs[0].channels(), 3);
+  EXPECT_EQ(cv_imgs[0].rows, 80);
+  EXPECT_EQ(cv_imgs[0].cols, 100);
+}
+
+TEST_F(IOTest, TestReadVideoToCVMatFromAviBasic) {
+  string path = CMAKE_SOURCE_DIR \
+                "caffe/test/test_data/UCF-101_Rowing_g16_c03.avi";
+  std::vector<cv::Mat> cv_imgs;
+  bool read_video_result = ReadVideoToCVMat(path,
+                                            1,     // start frame
+                                            19,    // length (# frames)
+                                            0,     // new height
+                                            0,     // new width
+                                            true,  // load as color
+                                            &cv_imgs);
+  EXPECT_EQ(read_video_result, true);
+  EXPECT_EQ(cv_imgs.size(), 19);
+  EXPECT_EQ(cv_imgs[0].channels(), 3);
+  EXPECT_EQ(cv_imgs[0].rows, 240);
+  EXPECT_EQ(cv_imgs[0].cols, 320);
+}
+
+TEST_F(IOTest, TestReadVideoToCVMatFromAviResize) {
+  string path = CMAKE_SOURCE_DIR \
+                "caffe/test/test_data/UCF-101_Rowing_g16_c03.avi";
+  std::vector<cv::Mat> cv_imgs;
+  bool read_video_result = ReadVideoToCVMat(path,
+                                            1,      // start frame
+                                            19,     // length (# frames)
+                                            123,    // new height
+                                            300,    // new width
+                                            true,   // load as color
+                                            &cv_imgs);
+  EXPECT_EQ(read_video_result, true);
+  EXPECT_EQ(cv_imgs.size(), 19);
+  EXPECT_EQ(cv_imgs[0].channels(), 3);
+  EXPECT_EQ(cv_imgs[0].rows, 123);
+  EXPECT_EQ(cv_imgs[0].cols, 300);
+}
+
+TEST_F(IOTest, TestReadVideoToCVMatFromAviResizeAndGrayscale) {
+  string path = CMAKE_SOURCE_DIR \
+                "caffe/test/test_data/UCF-101_Rowing_g16_c03.avi";
+  std::vector<cv::Mat> cv_imgs;
+  bool read_video_result = ReadVideoToCVMat(path,
+                                            1,      // start frame
+                                            16,     // length (# frames)
+                                            80,     // new height
+                                            100,    // new width
+                                            false,  // load as color
+                                            &cv_imgs);
+  EXPECT_EQ(read_video_result, true);
+  EXPECT_EQ(cv_imgs.size(), 16);
+  EXPECT_EQ(cv_imgs[0].channels(), 1);
+  EXPECT_EQ(cv_imgs[0].rows, 80);
+  EXPECT_EQ(cv_imgs[0].cols, 100);
 }
 
 }  // namespace caffe

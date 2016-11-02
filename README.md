@@ -1,37 +1,49 @@
-# Caffe
+# Video-Caffe: Caffe with C3D implementation and video reader
 
-[![Build Status](https://travis-ci.org/BVLC/caffe.svg?branch=master)](https://travis-ci.org/BVLC/caffe)
-[![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
+[![Build Status](https://travis-ci.org/chuckcho/video-caffe.svg?branch=master)](https://travis-ci.org/chuckcho/video-caffe)
 
-Caffe is a deep learning framework made with expression, speed, and modularity in mind.
-It is developed by the Berkeley Vision and Learning Center ([BVLC](http://bvlc.eecs.berkeley.edu)) and community contributors.
+This is 3D convolution (C3D) and video reader implementation in the latest Caffe (Oct 2016). The original [Facebook C3D implementation](https://github.com/facebook/C3D/) is branched out from Caffe on July 17, 2014 with git commit [b80fc86](https://github.com/BVLC/caffe/tree/b80fc862952ba4e068cf74acc0823785ce1cc0e9), and has not been rebased with the original Caffe, hence missing out quite a few new features in the recent Caffe. I therefore pulled in C3D concept and an accompanying video reader and applied to the latest Caffe, and will try to rebase this repo with the upstream whenever there is a new important feature. This repo is rebased on [efe1732](https://github.com/BVLC/caffe/commit/efe173237363143a93f42b36c9e8973967643bc4), on Nov 1 2016.
+Please reach [me](https://github.com/chuckcho) for any feedback or question.
 
-Check out the [project site](http://caffe.berkeleyvision.org) for all the details like
+Check out the [original Caffe readme](README-original.md) for Caffe-specific information.
 
-- [DIY Deep Learning for Vision with Caffe](https://docs.google.com/presentation/d/1UeKXVgRvvxg9OUdh_UiC5G71UMscNPlvArsWER41PsU/edit#slide=id.p)
-- [Tutorial Documentation](http://caffe.berkeleyvision.org/tutorial/)
-- [BVLC reference models](http://caffe.berkeleyvision.org/model_zoo.html) and the [community model zoo](https://github.com/BVLC/caffe/wiki/Model-Zoo)
-- [Installation instructions](http://caffe.berkeleyvision.org/installation.html)
+## Requirements
 
-and step-by-step examples.
+In addition to [prerequisites for Caffe](http://caffe.berkeleyvision.org/installation.html#prerequisites), video-caffe depends on cuDNN. It is known to work with CuDNN verson 4 and 5, but it may need some efforts to build with v3.
 
-[![Join the chat at https://gitter.im/BVLC/caffe](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/BVLC/caffe?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+* If you use "make" to build make sure `Makefile.config` point to the right paths for CUDA and CuDNN.
+* If you use "cmake" to build, double-check `CUDNN_INCLUDE` and `CUDNN_LIBRARY` are correct. If not, you may want something like `cmake -DCUDNN_INCLUDE="/your/path/to/include" -DCUDNN_LIBRARY="/your/path/to/lib" ${video-caffe-root}`.
 
-Please join the [caffe-users group](https://groups.google.com/forum/#!forum/caffe-users) or [gitter chat](https://gitter.im/BVLC/caffe) to ask questions and talk about methods and models.
-Framework development discussions and thorough bug reports are collected on [Issues](https://github.com/BVLC/caffe/issues).
+## Building video-caffe
 
-Happy brewing!
+Key steps to build video-caffe are:
+
+1. `git clone git@github.com:chuckcho/video-caffe.git`
+2. `cd video-caffe`
+3. `mkdir build && cd build`
+4. `cmake ..`
+5. Make sure CUDA and CuDNN are detected and their paths are correct.
+6. `make all`
+7. `make install`
+8. (optional) `make runtest`
+
+## UCF-101 training demo
+
+Scripts and training files for C3D training on UCF-101 are located in [examples/c3d_ucf101/](examples/c3d_ucf101/).
+Steps to train C3D on UCF-101:
+
+1. Download UCF-101 dataset from [UCF-101 website](http://crcv.ucf.edu/data/UCF101.php).
+2. Unzip the dataset: e.g. `unrar x UCF101.rar`
+3. (Optional) video reader works more stably with extracted frames than directly with video files. Extract frames from UCF-101 videos by revising and running a helper script, `${video-caffe-root}/examples/c3d_ucf101/extract_UCF-101_frames.sh`.
+4. Change `${video-caffe-root}/examples/c3d_ucf101/c3d_ucf101_{train,test}_split1.txt` to correctly point to UCF-101 videos or directories that contain extracted frames.
+5. Modify `${video-caffe-root}/examples/c3d_ucf101/c3d_ucf101_train_test.prototxt` to your taste or HW specification. Especially `batch_size` may need to be adjusted for the GPU memory.
+6. Run training script: e.g. `cd ${video-caffe-root} && examples/c3d_ucf101/train_ucf101.sh`
+7. At 7 epochs of training, clip accuracy should be around 45%.
+
+## Pretrained model
+
+[Jimmy](https://github.com/lood339) provided a pretrained model ([downloadable link](https://dl.dropboxusercontent.com/u/54750216/C3D_models/c3d_ucf101_iter_38000.caffemodel)) for UCF101 (trained from scratch), achieving top-1 accuracy of 47% (as reported in https://github.com/chuckcho/video-caffe/issues/46).
 
 ## License and Citation
 
 Caffe is released under the [BSD 2-Clause license](https://github.com/BVLC/caffe/blob/master/LICENSE).
-The BVLC reference models are released for unrestricted use.
-
-Please cite Caffe in your publications if it helps your research:
-
-    @article{jia2014caffe,
-      Author = {Jia, Yangqing and Shelhamer, Evan and Donahue, Jeff and Karayev, Sergey and Long, Jonathan and Girshick, Ross and Guadarrama, Sergio and Darrell, Trevor},
-      Journal = {arXiv preprint arXiv:1408.5093},
-      Title = {Caffe: Convolutional Architecture for Fast Feature Embedding},
-      Year = {2014}
-    }

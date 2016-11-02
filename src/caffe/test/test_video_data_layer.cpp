@@ -75,7 +75,6 @@ TYPED_TEST(VideoDataLayerTest, TestRead) {
   const int num = 5;
   const int channels = 3;
   const int length = 16;
-  //this->SetUp3DTestTopBlob();
   video_data_param->set_batch_size(num);
   video_data_param->set_new_length(length);
   video_data_param->set_source(this->filename_.c_str());

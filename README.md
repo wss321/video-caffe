@@ -44,6 +44,12 @@ Steps to train C3D on UCF-101:
 
 [Jimmy](https://github.com/lood339) provided a pretrained model ([downloadable link](https://dl.dropboxusercontent.com/u/54750216/C3D_models/c3d_ucf101_iter_38000.caffemodel)) for UCF101 (trained from scratch), achieving top-1 accuracy of 47% (as reported in https://github.com/chuckcho/video-caffe/issues/46).
 
+
+## To-do's
+
+1. Make a C3D-compatible python wrapper available.
+2. Check CuDNN ND max-pooling works as intended in all conditions (https://github.com/BVLC/caffe/pull/3574).
+
 ## License and Citation
 
 Caffe is released under the [BSD 2-Clause license](https://github.com/BVLC/caffe/blob/master/LICENSE).

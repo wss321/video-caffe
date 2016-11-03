@@ -7,6 +7,10 @@ Please reach [me](https://github.com/chuckcho) for any feedback or question.
 
 Check out the [original Caffe readme](README-original.md) for Caffe-specific information.
 
+## Branches
+
+[`refactor` branch](https://github.com/chuckcho/video-caffe/tree/refactor) is a recent re-work, based on the [original Caffe](https://github.com/BVLC/caffe) and [Nd convolution and pooling with cuDNN PR](https://github.com/BVLC/caffe/pull/3983). This is a cleaner, less-hacky implementation of 3D convolution/pooling than the `master` branch, and is supposed to more stable than the `master` branch. So, feel free to try this branch. One missing feature in the `refactor` branch (yet) is the python wrapper.
+
 ## Requirements
 
 In addition to [prerequisites for Caffe](http://caffe.berkeleyvision.org/installation.html#prerequisites), video-caffe depends on cuDNN. It is known to work with CuDNN verson 4 and 5, but it may need some efforts to build with v3.
@@ -27,6 +31,88 @@ Key steps to build video-caffe are:
 7. `make install`
 8. (optional) `make runtest`
 
+## Usage
+
+Look at [`${video-caffe-root}/examples/c3d_ucf101/c3d_ucf101_train_test.prototxt`](examples/c3d_ucf101/c3d_ucf101_train_test.prototxt) for how 3D convolution and pooling are used. In a nutshell, use `Convolution` or `Pooling` layer with 3 repeated `{kernel_size,stride,pad}` fields that specify 3D shape (L x H x W) where `L` is the temporal length (usually 16).
+```
+...
+# ----- video/label input -----
+layer {
+  name: "data"
+  type: "VideoData"
+  top: "data"
+  top: "label"
+  video_data_param {
+    source: "examples/c3d_ucf101/c3d_ucf101_train_split1.txt"
+    batch_size: 50
+    new_height: 128
+    new_width: 171
+    new_length: 16
+    shuffle: true
+  }
+  include {
+    phase: TRAIN
+  }
+  transform_param {
+    crop_size: 112
+    mirror: true
+    mean_value: 90
+    mean_value: 98
+    mean_value: 102
+  }
+}
+...
+# ----- 1st group -----
+layer {
+  name: "conv1a"
+  type: "Convolution"
+  bottom: "data"
+  top: "conv1a"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 64
+    kernel_size: 3
+    kernel_size: 3
+    kernel_size: 3
+    pad: 1
+    pad: 1
+    pad: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+...
+layer {
+  name: "pool1"
+  type: "Pooling"
+  bottom: "conv1a"
+  top: "pool1"
+  pooling_param {
+    pool: MAX
+    kernel_size: 1
+    kernel_size: 2
+    kernel_size: 2
+    stride: 1
+    stride: 2
+    stride: 2
+  }
+}
+...
+```
+
 ## UCF-101 training demo
 
 Scripts and training files for C3D training on UCF-101 are located in [examples/c3d_ucf101/](examples/c3d_ucf101/).
@@ -38,12 +124,12 @@ Steps to train C3D on UCF-101:
 4. Change `${video-caffe-root}/examples/c3d_ucf101/c3d_ucf101_{train,test}_split1.txt` to correctly point to UCF-101 videos or directories that contain extracted frames.
 5. Modify `${video-caffe-root}/examples/c3d_ucf101/c3d_ucf101_train_test.prototxt` to your taste or HW specification. Especially `batch_size` may need to be adjusted for the GPU memory.
 6. Run training script: e.g. `cd ${video-caffe-root} && examples/c3d_ucf101/train_ucf101.sh`
-7. At 7 epochs of training, clip accuracy should be around 45%.
+7. (Optional) Occasionally run [`${video-caffe-root}/tool/extra/plot_training_loss.sh`](tools/extra/plot_training_loss.sh) to get training loss / validation accuracy (top1/5) plot. It's pretty hacky, so look at the file to meet your need.
+8. At 7 epochs of training, clip accuracy should be around 45%.
 
 ## Pretrained model
 
 [Jimmy](https://github.com/lood339) provided a pretrained model ([downloadable link](https://dl.dropboxusercontent.com/u/54750216/C3D_models/c3d_ucf101_iter_38000.caffemodel)) for UCF101 (trained from scratch), achieving top-1 accuracy of 47% (as reported in https://github.com/chuckcho/video-caffe/issues/46).
-
 
 ## To-do's
 

@@ -48,12 +48,19 @@ void VideoDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype>*>&
     lines_.push_back(video_and_label);
   }
 
+  CHECK(!lines_.empty()) << "File is empty";
+
   if (this->layer_param_.video_data_param().shuffle()) {
     // randomly shuffle data
     LOG(INFO) << "Shuffling data";
     const unsigned int prefetch_rng_seed = caffe_rng_rand();
     prefetch_rng_.reset(new Caffe::RNG(prefetch_rng_seed));
     ShuffleVideos();
+  } else {
+    if (this->phase_ == TRAIN && Caffe::solver_rank() > 0 &&
+        this->layer_param_.video_data_param().rand_skip() == 0) {
+      LOG(WARNING) << "Shuffling or skipping recommended for multi-GPU";
+    }
   }
   LOG(INFO) << "A total of " << lines_.size() << " video chunks.";
 
@@ -90,8 +97,8 @@ void VideoDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype>*>&
   const int batch_size = this->layer_param_.video_data_param().batch_size();
   CHECK_GT(batch_size, 0) << "Positive batch size required";
   top_shape[0] = batch_size;
-  for (int i = 0; i < this->PREFETCH_COUNT; ++i) {
-    this->prefetch_[i].data_.Reshape(top_shape);
+  for (int i = 0; i < this->prefetch_.size(); ++i) {
+    this->prefetch_[i]->data_.Reshape(top_shape);
   }
   top[0]->Reshape(top_shape);
 
@@ -101,8 +108,8 @@ void VideoDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype>*>&
   // label
   vector<int> label_shape(1, batch_size);
   top[1]->Reshape(label_shape);
-  for (int i = 0; i < this->PREFETCH_COUNT; ++i) {
-    this->prefetch_[i].label_.Reshape(label_shape);
+  for (int i = 0; i < this->prefetch_.size(); ++i) {
+    this->prefetch_[i]->label_.Reshape(label_shape);
   }
 }
 

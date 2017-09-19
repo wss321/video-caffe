@@ -35,7 +35,7 @@ class VideoDataLayerTest : public MultiDeviceTest<TypeParam> {
     LOG(INFO) << "Using temporary file " << filename_;
     for (int i = 0; i < 5; ++i) {
       outfile <<
-        CMAKE_SOURCE_DIR "caffe/test/test_data/UCF-101_Rowing_g16_c03.avi " <<
+        EXAMPLES_SOURCE_DIR "videos/UCF-101_Rowing_g16_c03.avi " <<
         "0 " << i;
     }
     outfile.close();
@@ -44,10 +44,10 @@ class VideoDataLayerTest : public MultiDeviceTest<TypeParam> {
     std::ofstream reshapefile(filename_reshape_.c_str(), std::ofstream::out);
     LOG(INFO) << "Using temporary file " << filename_reshape_;
     reshapefile <<
-        CMAKE_SOURCE_DIR "caffe/test/test_data/UCF-101_Rowing_g16_c03.avi " <<
+        EXAMPLES_SOURCE_DIR "videos/UCF-101_Rowing_g16_c03.avi " <<
         "0 0";
     reshapefile <<
-        CMAKE_SOURCE_DIR "caffe/test/test_data/UCF-101_Rowing_g16_c03.avi " <<
+        EXAMPLES_SOURCE_DIR "videos/UCF-101_Rowing_g16_c03.avi " <<
         "0 1";
     reshapefile.close();
   }

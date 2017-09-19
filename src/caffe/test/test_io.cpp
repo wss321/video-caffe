@@ -426,8 +426,8 @@ TEST_F(IOTest, TestDecodeDatumToCVMatContentNative) {
 }
 
 TEST_F(IOTest, TestReadVideoToCVMatBasic) {
-  string path = CMAKE_SOURCE_DIR \
-                "caffe/test/test_data/youtube_objects_dog_v0002_s006";
+  string path = EXAMPLES_SOURCE_DIR \
+                "videos/youtube_objects_dog_v0002_s006";
   std::vector<cv::Mat> cv_imgs;
   bool read_video_result = ReadVideoToCVMat(path,
                                             1,     // start frame
@@ -444,8 +444,8 @@ TEST_F(IOTest, TestReadVideoToCVMatBasic) {
 }
 
 TEST_F(IOTest, TestReadVideoToCVMatNotEnoughFrames) {
-  string path = CMAKE_SOURCE_DIR \
-                "caffe/test/test_data/youtube_objects_dog_v0002_s006";
+  string path = EXAMPLES_SOURCE_DIR \
+                "videos/youtube_objects_dog_v0002_s006";
   std::vector<cv::Mat> cv_imgs;
   bool read_video_result = ReadVideoToCVMat(path,
                                             2,     // start frame
@@ -458,8 +458,8 @@ TEST_F(IOTest, TestReadVideoToCVMatNotEnoughFrames) {
 }
 
 TEST_F(IOTest, TestReadVideoToCVMatResize) {
-  string path = CMAKE_SOURCE_DIR \
-                "caffe/test/test_data/youtube_objects_dog_v0002_s006";
+  string path = EXAMPLES_SOURCE_DIR \
+                "videos/youtube_objects_dog_v0002_s006";
   std::vector<cv::Mat> cv_imgs;
   bool read_video_result = ReadVideoToCVMat(path,
                                             1,     // start frame
@@ -476,8 +476,8 @@ TEST_F(IOTest, TestReadVideoToCVMatResize) {
 }
 
 TEST_F(IOTest, TestReadVideoToCVMatFromAviBasic) {
-  string path = CMAKE_SOURCE_DIR \
-                "caffe/test/test_data/UCF-101_Rowing_g16_c03.avi";
+  string path = EXAMPLES_SOURCE_DIR \
+                "videos/UCF-101_Rowing_g16_c03.avi";
   std::vector<cv::Mat> cv_imgs;
   bool read_video_result = ReadVideoToCVMat(path,
                                             1,     // start frame
@@ -494,8 +494,8 @@ TEST_F(IOTest, TestReadVideoToCVMatFromAviBasic) {
 }
 
 TEST_F(IOTest, TestReadVideoToCVMatFromAviResize) {
-  string path = CMAKE_SOURCE_DIR \
-                "caffe/test/test_data/UCF-101_Rowing_g16_c03.avi";
+  string path = EXAMPLES_SOURCE_DIR \
+                "videos/UCF-101_Rowing_g16_c03.avi";
   std::vector<cv::Mat> cv_imgs;
   bool read_video_result = ReadVideoToCVMat(path,
                                             1,      // start frame
@@ -512,8 +512,8 @@ TEST_F(IOTest, TestReadVideoToCVMatFromAviResize) {
 }
 
 TEST_F(IOTest, TestReadVideoToCVMatFromAviResizeAndGrayscale) {
-  string path = CMAKE_SOURCE_DIR \
-                "caffe/test/test_data/UCF-101_Rowing_g16_c03.avi";
+  string path = EXAMPLES_SOURCE_DIR \
+                "videos/UCF-101_Rowing_g16_c03.avi";
   std::vector<cv::Mat> cv_imgs;
   bool read_video_result = ReadVideoToCVMat(path,
                                             1,      // start frame

@@ -19,9 +19,9 @@ class InfogainLossLayerTest : public MultiDeviceTest<TypeParam> {
 
  protected:
   InfogainLossLayerTest()
-      : blob_bottom_data_(new Blob<Dtype>(4, 2, 5, 2)),
-        blob_bottom_label_(new Blob<Dtype>(4, 2, 1, 2)),
-        blob_bottom_infogain_(new Blob<Dtype>(1, 1, 5, 5)),
+      : blob_bottom_data_(new Blob<Dtype>(4, 2, 1, 5, 2)),
+        blob_bottom_label_(new Blob<Dtype>(4, 2, 1, 1, 2)),
+        blob_bottom_infogain_(new Blob<Dtype>(1, 1, 1, 5, 5)),
         blob_top_loss_(new Blob<Dtype>()),
         blob_top_prob_(new Blob<Dtype>()),
         inner_(2), outer_(4*2), num_labels_(5) {
@@ -65,10 +65,10 @@ class InfogainLossLayerTest : public MultiDeviceTest<TypeParam> {
 TYPED_TEST_CASE(InfogainLossLayerTest, TestDtypesAndDevices);
 
 // TODO(chuck): revisit and fix
-TYPED_TEST(InfogainLossLayerTest, DISABLED_TestInfogainLoss) {
+TYPED_TEST(InfogainLossLayerTest, TestInfogainLoss) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
-  layer_param.mutable_infogain_loss_param()->set_axis(2);
+  layer_param.mutable_infogain_loss_param()->set_axis(3);
   layer_param.clear_loss_weight();
   layer_param.add_loss_weight(1);
   layer_param.add_loss_weight(0);

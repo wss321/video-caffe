@@ -174,8 +174,7 @@ TYPED_TEST(ArgMaxLayerTest, TestCPUTopK) {
   }
 }
 
-// TODO(chuck): revisit and fix
-TYPED_TEST(ArgMaxLayerTest, DISABLED_TestCPUMaxValTopK) {
+TYPED_TEST(ArgMaxLayerTest, TestCPUMaxValTopK) {
   LayerParameter layer_param;
   ArgMaxParameter* argmax_param = layer_param.mutable_argmax_param();
   argmax_param->set_out_max_val(true);

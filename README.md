@@ -120,6 +120,8 @@ Steps to train C3D on UCF-101:
 7. (Optional) Occasionally run [`${video-caffe-root}/tool/extra/plot_training_loss.sh`](tools/extra/plot_training_loss.sh) to get training loss / validation accuracy (top1/5) plot. It's pretty hacky, so look at the file to meet your need.
 8. At 7 epochs of training, clip accuracy should be around 45%.
 
+A typical training will yield the following loss and top-1 accuracy: ![iter-loss-accuracy plot](examples/c3d_ucf101/c3d_ucf101_train_loss_accuracy.png?raw=true "Iteration vs Training loss and top-1 accuracy")
+
 ## Pretrained model
 
 [Jimmy](https://github.com/lood339) provided a pretrained model ([downloadable link](https://dl.dropboxusercontent.com/u/54750216/C3D_models/c3d_ucf101_iter_38000.caffemodel)) for UCF101 (trained from scratch), achieving top-1 accuracy of 47% (as reported in https://github.com/chuckcho/video-caffe/issues/46).

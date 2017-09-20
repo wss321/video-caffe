@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/chuckcho/video-caffe.svg?branch=master)](https://travis-ci.org/chuckcho/video-caffe)
 
-This is 3D convolution (C3D) and video reader implementation in the latest Caffe (Dec 2016). The original [Facebook C3D implementation](https://github.com/facebook/C3D/) is branched out from Caffe on July 17, 2014 with git commit [b80fc86](https://github.com/BVLC/caffe/tree/b80fc862952ba4e068cf74acc0823785ce1cc0e9), and has not been rebased with the original Caffe, hence missing out quite a few new features in the recent Caffe. I therefore pulled in C3D concept and an accompanying video reader and applied to the latest Caffe, and will try to rebase this repo with the upstream whenever there is a new important feature. This repo is rebased on [5a201dd](https://github.com/BVLC/caffe/commit/5a201dd960840c319cefd9fa9e2a40d2c76ddd73), on Dec 19 2016.
+This is 3D convolution (C3D) and video reader implementation in the latest Caffe (Dec 2016). The original [Facebook C3D implementation](https://github.com/facebook/C3D/) is branched out from Caffe on July 17, 2014 with git commit [b80fc86](https://github.com/BVLC/caffe/tree/b80fc862952ba4e068cf74acc0823785ce1cc0e9), and has not been rebased with the original Caffe, hence missing out quite a few new features in the recent Caffe. I therefore pulled in C3D concept and an accompanying video reader and applied to the latest Caffe, and will try to rebase this repo with the upstream whenever there is a new important feature. This repo is rebased on [effcdb0](https://github.com/BVLC/caffe/commit/effcdb0b62410b2a6a54f18f23cf90733a115673), on Sep 19 2017.
 Please reach [me](https://github.com/chuckcho) for any feedback or question.
 
 Check out the [original Caffe readme](README-original.md) for Caffe-specific information.
@@ -114,7 +114,7 @@ Steps to train C3D on UCF-101:
 1. Download UCF-101 dataset from [UCF-101 website](http://crcv.ucf.edu/data/UCF101.php).
 2. Unzip the dataset: e.g. `unrar x UCF101.rar`
 3. (Optional) video reader works more stably with extracted frames than directly with video files. Extract frames from UCF-101 videos by revising and running a helper script, [`${video-caffe-root}/examples/c3d_ucf101/extract_UCF-101_frames.sh`](examples/c3d_ucf101/extract_UCF-101_frames.sh).
-4. Change [`${video-caffe-root}/examples/c3d_ucf101/c3d_ucf101_{train,test}_split1.txt`](examples/c3d_ucf101/c3d_ucf101_{train,test}_split1.txt) to correctly point to UCF-101 videos or directories that contain extracted frames.
+4. Change `${video-caffe-root}/examples/c3d_ucf101/c3d_ucf101_{train,test}_split1.txt` to correctly point to UCF-101 videos or directories that contain extracted frames.
 5. Modify [`${video-caffe-root}/examples/c3d_ucf101/c3d_ucf101_train_test.prototxt`](examples/c3d_ucf101/c3d_ucf101_train_test.prototxt`) to your taste or HW specification. Especially `batch_size` may need to be adjusted for the GPU memory.
 6. Run training script: e.g. `cd ${video-caffe-root} && examples/c3d_ucf101/train_ucf101.sh` (optionally use `--gpu` to use multiple GPU's)
 7. (Optional) Occasionally run [`${video-caffe-root}/tool/extra/plot_training_loss.sh`](tools/extra/plot_training_loss.sh) to get training loss / validation accuracy (top1/5) plot. It's pretty hacky, so look at the file to meet your need.

@@ -142,7 +142,7 @@ do
   if [[ "${LASTTIME}" != "${NEWTIME}" ]]
   then
     (killall eog 2> /dev/null)
-    cat ${LOGFILE} | egrep "Iteration.* loss = " | sed -e 's/.*Iteration //' -e 's/, loss = / /' > "${LOSSFILE}"
+    cat ${LOGFILE} | egrep "Iteration.* loss = " | sed -e 's/.*Iteration //' -e 's/ \(.*\), loss = / /' > "${LOSSFILE}"
     cat ${LOGFILE} | egrep -B 2 --no-group-separator ": accuracy\/top\-1" | egrep " solver\.cpp" | sed -e 's/.*Iteration //' -e 's/, Testing.*//' -e 's/.*= //' > "${ACCURACYTMPFILE}"
     paste - - < "${ACCURACYTMPFILE}" | awk '!seen[$1]++' > "${ACCURACYFILE}"
     cat ${LOGFILE} | egrep -B 3 --no-group-separator ": accuracy\/top\-5" | egrep -v "top\-1" | egrep " solver\.cpp" | sed -e 's/.*Iteration //' -e 's/, Testing.*//' -e 's/.*= //' > "${ACCURACYTMPFILE}"

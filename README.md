@@ -122,9 +122,14 @@ Steps to train C3D on UCF-101:
 
 A typical training will yield the following loss and top-1 accuracy: ![iter-loss-accuracy plot](examples/c3d_ucf101/c3d_ucf101_train_loss_accuracy.png?raw=true "Iteration vs Training loss and top-1 accuracy")
 
-## Pretrained model
+## Pre-trained model
 
-[Jimmy](https://github.com/lood339) provided a pretrained model ([downloadable link](https://dl.dropboxusercontent.com/u/54750216/C3D_models/c3d_ucf101_iter_38000.caffemodel)) for UCF101 (trained from scratch), achieving top-1 accuracy of 47% (as reported in https://github.com/chuckcho/video-caffe/issues/46).
+A pre-trained model is available ([downloadable link](https://www.dropbox.com/s/gglm2c67154nltr/c3d_ucf101_iter_20000.caffemodel?dl=0)) for UCF101 (trained from scratch), achieving top-1 accuracy of ~47%.
+
+## To-do
+1. Feature extractor script.
+2. Python demo script that loads a video and classifies.
+3. Convert Sport1M pre-trained model and make it available.
 
 ## License and Citation
 

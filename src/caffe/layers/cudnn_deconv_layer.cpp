@@ -99,10 +99,11 @@ void CuDNNDeconvolutionLayer<Dtype>::Reshape(
       << "Use 'engine: CAFFE' for general ND convolution.";
   bottom_offset_ = this->bottom_dim_ / this->group_;
   top_offset_ = this->top_dim_ / this->group_;
-  const int height = bottom[0]->shape(this->channel_axis_ + 1);
-  const int width = bottom[0]->shape(this->channel_axis_ + 2);
-  const int height_out = top[0]->shape(this->channel_axis_ + 1);
-  const int width_out = top[0]->shape(this->channel_axis_ + 2);
+  const bool forced_3d = this->forced_3d_;
+  const int height = bottom[0]->shape(this->channel_axis_ + 1 + forced_3d);
+  const int width = bottom[0]->shape(this->channel_axis_ + 2 + forced_3d);
+  const int height_out = top[0]->shape(this->channel_axis_ + 1 + forced_3d);
+  const int width_out = top[0]->shape(this->channel_axis_ + 2 + forced_3d);
   const int* pad_data = this->pad_.cpu_data();
   const int pad_h = pad_data[0];
   const int pad_w = pad_data[1];

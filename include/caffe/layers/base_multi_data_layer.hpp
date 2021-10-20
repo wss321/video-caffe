@@ -52,6 +52,14 @@ namespace caffe {
     template <typename Dtype>
     class Batch {
     public:
+        explicit Batch(int num=1){
+            data_.resize(num);
+        }
+        ~Batch(){
+            for (int i = 0; i < data_.size(); ++i) {
+                delete data_[i];
+            }
+        }
 //        vector<shared_ptr<Blob<Dtype>>> data_;
         vector<Blob<Dtype>*> data_;
     };

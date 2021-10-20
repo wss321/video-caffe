@@ -17,11 +17,11 @@ namespace caffe {
               transform_param_(param.transform_param()),
               transform_data_index_(param.multi_data_param().transform_data_index()),
               num_data_(param.multi_data_param().num_data()){
-                  int label_index = param.multi_data_param().label_index();
-        if (label_index<0){
-            CHECK_GT(num_data_ + label_index, -1)<<"num_data + label_index must not less than 0";
-            label_index_=num_data_ + label_index;
-        }
+//                  int label_index = param.multi_data_param().label_index();
+//        if (label_index<0){
+//            CHECK_GT(num_data_ + label_index, -1)<<"num_data + label_index must not less than 0";
+//            label_index_=num_data_ + label_index;
+//        }
 
     }
 
@@ -55,9 +55,9 @@ namespace caffe {
     template <typename Dtype>
     BaseMultiPrefetchingDataLayer<Dtype>::~BaseMultiPrefetchingDataLayer(){
         for (int i = 0; i < prefetch_.size(); ++i) {
-            for (int j = 0; j < prefetch_[i]->data_.size(); ++j) {
-                delete prefetch_[i]->data_[j];
-            }
+//            for (int j = 0; j < prefetch_[i]->data_.size(); ++j) {
+//                delete prefetch_[i]->data_[j];
+//            }
             delete prefetch_[i];
         }
     }

@@ -34,9 +34,6 @@ namespace caffe {
         string root_folder = this->layer_param_.video_gyro_data_param().root_folder();
         const int num_label  = this->layer_param_.video_gyro_data_param().num_label();
 
-        CHECK_GT(this->num_data_, 2)<<"Current implementation requires "
-                                      "new_height and new_width to be set at the same time.";
-
         CHECK((new_height == 0 && new_width == 0) ||
               (new_height > 0 && new_width > 0)) << "Current implementation requires "
                                                     "new_height and new_width to be set at the same time.";
@@ -170,7 +167,7 @@ namespace caffe {
         const int new_width = video_gyro_data_param.new_width();
         const bool is_color = video_gyro_data_param.is_color();
         const string root_folder = video_gyro_data_param.root_folder();
-        const int num_label  = this->layer_param_.video_gyro_data_param().num_label();
+//        const int num_label  = this->layer_param_.video_gyro_data_param().num_label();
 
         Dtype* prefetch_video_data = batch->data_[0]->mutable_cpu_data();
         Dtype* prefetch_gyro_data = batch->data_[1]->mutable_cpu_data();

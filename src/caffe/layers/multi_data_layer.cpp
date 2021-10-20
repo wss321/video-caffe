@@ -80,7 +80,10 @@ namespace caffe {
         double read_time = 0;
         double trans_time = 0;
         CPUTimer timer;
-        CHECK(batch->data_[0]->count());
+        for (int i = 0; i < batch->data_.size(); ++i) {
+            CHECK(batch->data_[0]->count());
+        }
+
         CHECK(this->transformed_data_.count());
         const int batch_size = this->layer_param_.data_param().batch_size();
 

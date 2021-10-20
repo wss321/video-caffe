@@ -138,30 +138,30 @@ void VideoDataLayer<Dtype>::load_batch(Batch<Dtype>* batch) {
   const bool is_color = video_data_param.is_color();
   string root_folder = video_data_param.root_folder();
 
-  // Reshape according to the first image of each batch
-  // on single input batches allows for inputs of varying dimension.
-  std::vector<cv::Mat> cv_imgs;
-  bool read_video_result = ReadVideoToCVMat(root_folder +
-                                             lines_[lines_id_].first,
-                                             lines_[lines_id_].second,
-                                             new_length, new_height, new_width,
-                                             is_color,
-                                             &cv_imgs);
-  CHECK(read_video_result) << "Could not load " << lines_[lines_id_].first <<
-                              " at frame " << lines_[lines_id_].second << ".";
-  CHECK_EQ(cv_imgs.size(), new_length) << "Could not load " <<
-                                          lines_[lines_id_].first <<
-                                          " at frame " <<
-                                          lines_[lines_id_].second <<
-                                          " correctly.";
-  // Use data_transformer to infer the expected blob shape from a cv_imgs.
-  bool is_video = true;
-  vector<int> top_shape = this->data_transformer_->InferBlobShape(cv_imgs,
-                                                                  is_video);
-  this->transformed_data_.Reshape(top_shape);
-  // Reshape batch according to the batch_size.
-  top_shape[0] = batch_size;
-  batch->data_.Reshape(top_shape);
+//  // Reshape according to the first image of each batch
+//  // on single input batches allows for inputs of varying dimension.
+//  std::vector<cv::Mat> cv_imgs;
+//  bool read_video_result = ReadVideoToCVMat(root_folder +
+//                                             lines_[lines_id_].first,
+//                                             lines_[lines_id_].second,
+//                                             new_length, new_height, new_width,
+//                                             is_color,
+//                                             &cv_imgs);
+//  CHECK(read_video_result) << "Could not load " << lines_[lines_id_].first <<
+//                              " at frame " << lines_[lines_id_].second << ".";
+//  CHECK_EQ(cv_imgs.size(), new_length) << "Could not load " <<
+//                                          lines_[lines_id_].first <<
+//                                          " at frame " <<
+//                                          lines_[lines_id_].second <<
+//                                          " correctly.";
+//  // Use data_transformer to infer the expected blob shape from a cv_imgs.
+//  bool is_video = true;
+//  vector<int> top_shape = this->data_transformer_->InferBlobShape(cv_imgs,
+//                                                                  is_video);
+//  this->transformed_data_.Reshape(top_shape);
+//  // Reshape batch according to the batch_size.
+//  top_shape[0] = batch_size;
+//  batch->data_.Reshape(top_shape);
 
   Dtype* prefetch_data = batch->data_.mutable_cpu_data();
   Dtype* prefetch_label = batch->label_.mutable_cpu_data();

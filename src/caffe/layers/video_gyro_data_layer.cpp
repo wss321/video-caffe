@@ -169,52 +169,8 @@ namespace caffe {
         const int new_height = video_gyro_data_param.new_height();
         const int new_width = video_gyro_data_param.new_width();
         const bool is_color = video_gyro_data_param.is_color();
-        string root_folder = video_gyro_data_param.root_folder();
-
-        // Reshape according to the first image of each batch
-        // on single input batches allows for inputs of varying dimension.
-        std::vector<cv::Mat> cv_imgs;
-        bool read_video_result = ReadVideoToCVMat(root_folder +
-                                                  lines_[lines_id_].first,
-                                                  lines_[lines_id_].fourth,
-                                                  new_length, new_height, new_width,
-                                                  is_color,
-                                                  &cv_imgs);
-//        LOG(INFO) << cv_imgs[0];
-        CHECK(read_video_result) << "Could not load " << lines_[lines_id_].first <<
-                                 " at frame " << lines_[lines_id_].second << ".";
-        CHECK_EQ(cv_imgs.size(), new_length) << "Could not load " <<
-                                             lines_[lines_id_].first <<
-                                             " at frame " <<
-                                             lines_[lines_id_].second <<
-                                             " correctly.";
-        // Read a gyro file, and use it to initialize the top blob.
-        cv::Mat gyro;
-        bool read_gyro_result = ReadCSVToCVMat(root_folder +
-                                               lines_[lines_id_].second,
-                                               gyro,',');
-        CHECK(read_gyro_result) << "Could not load " << lines_[lines_id_].second << ".";
-//        LOG(INFO) << gyro;
-
-
-
-//        // Read a label file, and use it to initialize the top blob.
-//        cv::Mat label;
-//        bool read_label_result = ReadCSVToCVMat(root_folder +
-//                                               lines_[lines_id_].third,
-//                                               label,',');
-//        CHECK(read_label_result) << "Could not load " << lines_[lines_id_].third << ".";
-        // Use data_transformer to infer the expected blob shape from a cv_imgs.
-        bool is_video = true;
-        vector<int> top_video_shape = this->data_transformer_->InferBlobShape(cv_imgs,
-                                                                              is_video);
-        this->transformed_data_.Reshape(top_video_shape);
-        // Reshape batch according to the batch_size.
-        top_video_shape[0] = batch_size;
-        batch->data_[0]->Reshape(top_video_shape);
-        vector<int> top_gyro_shape{batch_size, gyro.rows,  gyro.cols};
-        batch->data_[1]->Reshape(top_gyro_shape);
-
+        const string root_folder = video_gyro_data_param.root_folder();
+        const int num_label  = this->layer_param_.video_gyro_data_param().num_label();
 
         Dtype* prefetch_video_data = batch->data_[0]->mutable_cpu_data();
         Dtype* prefetch_gyro_data = batch->data_[1]->mutable_cpu_data();

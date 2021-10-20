@@ -47,8 +47,18 @@ namespace caffe {
               prefetch_(param.multi_data_param().prefetch()),
               prefetch_free_(), prefetch_full_(), prefetch_current_() {
         for (int i = 0; i < prefetch_.size(); ++i) {
-            prefetch_[i].reset(new Batch<Dtype>());
-            prefetch_free_.push(prefetch_[i].get());
+//            prefetch_[i].reset(new Batch<Dtype>());
+            prefetch_[i]=new Batch<Dtype>();
+            prefetch_free_.push(prefetch_[i]);
+        }
+    }
+    template <typename Dtype>
+    BaseMultiPrefetchingDataLayer<Dtype>::~BaseMultiPrefetchingDataLayer(){
+        for (int i = 0; i < prefetch_.size(); ++i) {
+            for (int j = 0; j < prefetch_[i]->data_.size(); ++j) {
+                delete prefetch_[i]->data_[j];
+            }
+            delete prefetch_[i];
         }
     }
 
@@ -63,9 +73,7 @@ namespace caffe {
         // seems to cause failures if we do not so.
 
         for (int i = 0; i < prefetch_.size(); ++i){
-//            prefetch_[i]->data_.resize(this->num_data_);
             for (int j = 0; j < prefetch_[i]->data_.size(); ++j){
-//                prefetch_[i]->data_[j].reset(new Blob<Dtype>());
                 prefetch_[i]->data_[j]->mutable_cpu_data();
             }
 
@@ -75,7 +83,6 @@ namespace caffe {
 #ifndef CPU_ONLY
         if (Caffe::mode() == Caffe::GPU) {
             for (int i = 0; i < prefetch_.size(); ++i){
-//                prefetch_[i]->data_.resize(this->num_data_);
                 for (int j = 0; j < prefetch_[i]->data_.size(); ++j)
                     prefetch_[i]->data_[j]->mutable_gpu_data();
             }
@@ -103,7 +110,7 @@ namespace caffe {
 #ifndef CPU_ONLY
                 if (Caffe::mode() == Caffe::GPU) {
                     for (int i = 0; i < batch->data_.size(); ++i) {
-                        batch->data_[i]->data().get()->async_gpu_push(stream);
+                        batch->data_[i]->data()->async_gpu_push(stream);
                     }
                     CUDA_CHECK(cudaStreamSynchronize(stream));
                 }
@@ -129,7 +136,8 @@ namespace caffe {
         prefetch_current_ = prefetch_full_.pop("Waiting for data");
         // Reshape to loaded data.
         for (int i = 0; i < top.size(); ++i) {
-            top[i]->ReshapeLike(*prefetch_current_->data_[i]);
+//            top[i]->ReshapeLike(*prefetch_current_->data_[i].get());
+            top[i]->Reshape(prefetch_current_->data_[i]->shape());
             top[i]->set_cpu_data(prefetch_current_->data_[i]->mutable_cpu_data());
         }
     }

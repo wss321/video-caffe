@@ -64,6 +64,7 @@ namespace caffe {
         // LayerSetUp: implements common data layer setup functionality, and calls
         // DataLayerSetUp to do special data layer setup for individual layer types.
         // This method may not be overridden.
+        ~BaseMultiPrefetchingDataLayer();
         void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
                         const vector<Blob<Dtype>*>& top);
 
@@ -76,7 +77,7 @@ namespace caffe {
         virtual void InternalThreadEntry();
         virtual void load_batch(Batch<Dtype>* batch) = 0;
 
-        vector<shared_ptr<Batch<Dtype>>> prefetch_;
+        vector<Batch<Dtype>*> prefetch_;
         BlockingQueue<Batch<Dtype>*> prefetch_free_;
         BlockingQueue<Batch<Dtype>*> prefetch_full_;
         Batch<Dtype>* prefetch_current_;

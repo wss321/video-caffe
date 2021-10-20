@@ -150,6 +150,9 @@ void CVMatToDatum(const cv::Mat& cv_img, Datum* datum);
 bool ReadVideoToCVMat(const string& filename,
     const int frame_num, const int length, const int height, const int width,
     const bool is_color, std::vector<cv::Mat>* cv_imgs);
+
+//template <typename Dtype>
+bool ReadCSVToCVMat(const string& filename, cv::Mat& mat, const char delim);
 #endif  // USE_OPENCV
 
 }  // namespace caffe

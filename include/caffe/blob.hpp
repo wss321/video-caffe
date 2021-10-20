@@ -8,6 +8,8 @@
 #include "caffe/common.hpp"
 #include "caffe/proto/caffe.pb.h"
 #include "caffe/syncedmem.hpp"
+#include <iostream>
+
 
 const int kMaxBlobAxes = 32;
 
@@ -307,6 +309,8 @@ class Blob {
 
   DISABLE_COPY_AND_ASSIGN(Blob);
 };  // class Blob
+    template <typename Dtype>
+    std::ostream & operator<< (std::ostream & out, Blob<Dtype>& blob);
 
 }  // namespace caffe
 

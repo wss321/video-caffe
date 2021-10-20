@@ -389,6 +389,7 @@ message LayerParameter {
   optional ConvolutionParameter convolution_param = 106;
   optional CropParameter crop_param = 144;
   optional DataParameter data_param = 107;
+  optional MultiDataParameter multi_data_param = 7785;
   optional DropoutParameter dropout_param = 108;
   optional DummyDataParameter dummy_data_param = 109;
   optional EltwiseParameter eltwise_param = 110;
@@ -427,6 +428,12 @@ message LayerParameter {
   optional TileParameter tile_param = 138;
   optional VideoDataParameter video_data_param = 7777;
   optional WindowDataParameter window_data_param = 129;
+  optional LayerNormParameter layer_norm_param = 7780;
+  optional AttentionParameter attention_param = 7781;
+  optional TensorTransposeParameter tensor_transpose_param = 7782;
+  optional LSTMParameter lstm_param = 7783;
+  optional GRUParameter gru_param = 7784;
+  optional VideoGyroDataParameter video_gyro_data_param = 7786;
 }
 
 // Message that stores parameters used to apply transformation
@@ -548,6 +555,10 @@ message BatchNormParameter {
   optional float moving_average_fraction = 2 [default = .999];
   // Small value to add to the variance estimate so that we don't divide by
   // zero.
+  optional float eps = 3 [default = 1e-5];
+}
+
+message LayerNormParameter {
   optional float eps = 3 [default = 1e-5];
 }
 
@@ -705,7 +716,42 @@ message DataParameter {
   // limit of device memory for GPU training)
   optional uint32 prefetch = 10 [default = 4];
 }
-
+message MultiDataParameter {
+  enum DB {
+    LEVELDB = 0;
+    LMDB = 1;
+  }
+  // Specify the data source.
+  optional string source = 1;
+  // Specify the batch size.
+  optional uint32 batch_size = 4;
+  // The rand_skip variable is for the data layer to skip a few data points
+  // to avoid all asynchronous sgd clients to start at the same point. The skip
+  // point would be set as rand_skip * rand(0,1). Note that rand_skip should not
+  // be larger than the number of keys in the database.
+  // DEPRECATED. Each solver accesses a different subset of the database.
+  optional uint32 rand_skip = 7 [default = 0];
+  optional DB backend = 8 [default = LEVELDB];
+  // DEPRECATED. See TransformationParameter. For data pre-processing, we can do
+  // simple scaling and subtracting the data mean, if provided. Note that the
+  // mean subtraction is always carried out before scaling.
+  optional float scale = 2 [default = 1];
+  optional string mean_file = 3;
+  // DEPRECATED. See TransformationParameter. Specify if we would like to randomly
+  // crop an image.
+  optional uint32 crop_size = 5 [default = 0];
+  // DEPRECATED. See TransformationParameter. Specify if we want to randomly mirror
+  // data.
+  optional bool mirror = 6 [default = false];
+  // Force the encoded image to have 3 color channels
+  optional bool force_encoded_color = 9 [default = false];
+  // Prefetch queue (Increase if data feeding bandwidth varies, within the
+  // limit of device memory for GPU training)
+  optional uint32 prefetch = 10 [default = 4];
+  optional int32 label_index = 11 [default = -1];
+  required uint32 num_data = 12;
+  optional uint32 transform_data_index = 13 [default = 0];
+}
 message DropoutParameter {
   optional float dropout_ratio = 1 [default = 0.5]; // dropout ratio
 }
@@ -1009,6 +1055,52 @@ message RecurrentParameter {
   optional bool expose_hidden = 5 [default = false];
 }
 
+// Message that stores parameters used by RecurrentLayer
+message AttentionParameter {
+  // The dimension of the output (and usually hidden state) representation --
+  // must be explicitly set to non-zero.
+  optional uint32 num_output = 1 [default = 0];
+
+  optional FillerParameter weight_filler = 2; // The filler for the weight
+  optional FillerParameter bias_filler = 3; // The filler for the bias
+
+  // Whether to enable displaying debug_info in the unrolled recurrent net.
+  optional bool debug_info = 4 [default = false];
+  optional bool bias_term = 5 [default = false];
+//  optional uint32 n_head = 6 [default = 1];
+}
+
+message TensorTransposeParameter {
+  repeated uint32 order = 1; //order of the transpose blob's axes in the input blob
+}
+
+// Message that stores parameters used by LSTMParameter
+message LSTMParameter {
+  optional uint32 num_output = 1; // The number of outputs for the layer
+  optional float clipping_threshold = 2 [default = 0.0];
+  optional FillerParameter weight_filler = 3; // The filler for weight
+  optional FillerParameter bias_filler = 4; // The filler for the bias
+  optional uint32 batch_size = 5 [default = 1];
+}
+
+// Message that stores parameters used by LSTMParameter
+message GRUParameter {
+  optional uint32 num_output = 1; // The number of outputs for the layer
+  optional float clipping_threshold = 2 [default = 0.0];
+  optional FillerParameter weight_filler = 3; // The filler for weight
+  optional FillerParameter bias_filler = 4; // The filler for the bias
+}
+//message GRUParameter {
+//  optional uint32 num_output = 1; // The number of outputs for the layer
+//  optional float clipping_threshold = 2 [default = 0.0];
+//  optional FillerParameter weight_filler1 = 3; // The filler for weight
+//  optional FillerParameter bias_filler1 = 4; // The filler for the bias
+//  optional FillerParameter weight_filler2 = 5; // The filler for weight
+//  optional FillerParameter bias_filler2 = 6; // The filler for the bias
+//  optional FillerParameter weight_filler3 = 7; // The filler for weight
+//  optional FillerParameter weight_filler4 = 8; // The filler for weight
+//}
+
 // Message that stores parameters used by ReductionLayer
 message ReductionParameter {
   enum ReductionOp {
@@ -1243,6 +1335,30 @@ message VideoDataParameter {
   // Specify if the images are color or gray
   optional bool is_color = 12 [default = true];
   optional string root_folder = 13 [default = ""];
+}
+
+message VideoGyroDataParameter {
+  // Specify the data source.
+  optional string source = 1;
+  // Specify the batch size.
+  optional uint32 batch_size = 4 [default = 1];
+  // The rand_skip variable is for the data layer to skip a few data points
+  // to avoid all asynchronous sgd clients to start at the same point. The skip
+  // point would be set as rand_skip * rand(0,1). Note that rand_skip should not
+  // be larger than the number of keys in the database.
+  optional uint32 rand_skip = 7 [default = 0];
+  // Whether or not VideoLayer should shuffle the list of files at every epoch.
+  optional bool shuffle = 8 [default = false];
+  // Number of consecutive frames in a video (default=1 to make VideoData an
+  // generalization of the ImageData)
+  optional uint32 new_length = 9 [default = 1];
+  // It will also resize video frames if new_height or new_width are not zero.
+  optional uint32 new_height = 10 [default = 0];
+  optional uint32 new_width = 11 [default = 0];
+  // Specify if the images are color or gray
+  optional bool is_color = 12 [default = true];
+  optional string root_folder = 13 [default = ""];
+  optional uint32 num_label = 14 [default = 1];
 }
 
 message WindowDataParameter {

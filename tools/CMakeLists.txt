@@ -1,6 +1,6 @@
 # Collect source files
 file(GLOB_RECURSE srcs ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
-
+find_package(OpenCV REQUIRED)
 # Build each source file independently
 foreach(source ${srcs})
   get_filename_component(name ${source} NAME_WE)
@@ -13,6 +13,7 @@ foreach(source ${srcs})
   # target
   add_executable(${name} ${source})
   target_link_libraries(${name} ${Caffe_LINK})
+  target_link_libraries(${name} PRIVATE ${OpenCV_LIBS})
   caffe_default_properties(${name})
 
   # set back RUNTIME_OUTPUT_DIRECTORY

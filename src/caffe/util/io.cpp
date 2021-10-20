@@ -156,7 +156,55 @@ bool ReadImageToDatum(const string& filename, const int label,
     return false;
   }
 }
+//template <typename Dtype>
+bool ReadCSVToCVMat(const string& filename, cv::Mat& mat, const char delim){
+    std::ifstream file(filename.c_str(), std::ifstream::in);
 
+    if(! file)
+    {
+        LOG(ERROR) << "Could not open or find file " << filename;
+        return false;
+    }
+    string line;
+    int num_line = 0;
+    int num_col = 1;
+    if (getline(file, line)) {
+        num_line++;
+        for (int i = 0; i < line.size(); ++i) {
+            if (line[i] == delim) num_col++;
+        }
+    }
+
+    while (getline(file, line)) {
+        num_line++;
+    };
+    file.clear();
+    file.seekg(0, file.beg);
+    string data;
+    vector<float> out(num_line * num_col, 0);
+    int index = 0;
+//    if (typeid(Dtype(0))==typeid(double(0)))
+//        mat = cv::Mat::zeros(num_line,  num_col, CV_64FC1);
+//    else
+    mat = cv::Mat::zeros(num_line,  num_col, CV_32FC1);
+    int n_r = 0, n_c = 0;
+    while (getline(file, line)) {
+        std::istringstream sin(line);
+        n_c = 0;
+        while (getline(sin, data, ',')) {
+            out[index] = stof(data);
+            index++;
+            mat.at<float>(n_r,n_c) = stof(data);
+            n_c++;
+        }
+        n_r ++;
+
+    };
+
+    file.close();
+    return true;
+
+}
 bool ReadVideoToCVMat(const string& path,
     const int start_frame, const int length, const int height, const int width,
     const bool is_color, std::vector<cv::Mat>* cv_imgs) {

@@ -255,9 +255,9 @@ void Solver<Dtype>::Step(int iters) {
             loss_msg_stream << " (* " << loss_weight
                             << " = " << loss_weight * result_vec[k] << " loss)";
           }
-          LOG_IF(INFO, Caffe::root_solver()) << "    Train net output #"
-              << score_index++ << ": " << output_name << " = "
-              << result_vec[k] << loss_msg_stream.str();
+//          LOG_IF(INFO, Caffe::root_solver()) << "    Train net output #"
+//              << score_index++ << ": " << output_name << " = "
+//              << result_vec[k] << loss_msg_stream.str();
         }
       }
     }
@@ -363,7 +363,7 @@ void Solver<Dtype>::Test(const int test_net_id) {
         }
         request = GetRequestedAction();
     }
-    if (requested_early_exit_) {
+      if (requested_early_exit_) {
       // break out of test loop.
       break;
     }
@@ -393,7 +393,6 @@ void Solver<Dtype>::Test(const int test_net_id) {
     }
   }
   if (requested_early_exit_) {
-    LOG(INFO)     << "Test interrupted.";
     return;
   }
   if (param_.test_compute_loss()) {
@@ -411,8 +410,8 @@ void Solver<Dtype>::Test(const int test_net_id) {
       loss_msg_stream << " (* " << loss_weight
                       << " = " << loss_weight * mean_score << " loss)";
     }
-    LOG(INFO) << "    Test net output #" << i << ": " << output_name << " = "
-              << mean_score << loss_msg_stream.str();
+//    LOG(INFO) << "    Test net output #" << i << ": " << output_name << " = "
+//              << mean_score << loss_msg_stream.str();
   }
 }
 
@@ -463,8 +462,11 @@ string Solver<Dtype>::SnapshotToBinaryProto() {
   string model_filename = SnapshotFilename(".caffemodel");
   LOG(INFO) << "Snapshotting to binary proto file " << model_filename;
   NetParameter net_param;
+    LOG(INFO) << "net to proto ";
   net_->ToProto(&net_param, param_.snapshot_diff());
+    LOG(INFO) << "proto to file ";
   WriteProtoToBinaryFile(net_param, model_filename);
+    LOG(INFO) << "Done ";
   return model_filename;
 }
 

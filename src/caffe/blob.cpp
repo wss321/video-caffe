@@ -1,11 +1,11 @@
 #include <climits>
 #include <vector>
-
 #include "caffe/blob.hpp"
 #include "caffe/common.hpp"
 #include "caffe/syncedmem.hpp"
 #include "caffe/util/math_functions.hpp"
 
+using namespace std;
 namespace caffe {
 
 template <typename Dtype>
@@ -626,5 +626,27 @@ INSTANTIATE_CLASS(Blob);
 template class Blob<int>;
 template class Blob<unsigned int>;
 
-}  // namespace caffe
+template <typename Dtype>
+std::ostream & operator<< (std::ostream & out,Blob<Dtype>& blob)
+{
+    vector<int> shape = blob.shape();
+    const  Dtype * data = blob.cpu_data();
+    int dim = shape.size();
+    int count = blob.count();
+    for (int i = 0; i < shape.size(); ++i) {
+        out<<"[";
+    }
+    for (int i = 0; i < count; ++i) {
+        out<<data[i]<<" ";
+        for (int j = 0; j < dim; ++j) {
+            if (i%shape[j]==0) out<<"]\n";
+        }
 
+    }
+    for (int i = 0; i < shape.size()-1; ++i) {
+        out<<"size:("<<shape[i]<<", ";
+    }
+    out<<shape[shape.size()-1]<<")"<<endl;
+    return out;
+}
+}  // namespace caffe

@@ -1,5 +1,5 @@
 file(GLOB_RECURSE examples_srcs "${PROJECT_SOURCE_DIR}/examples/*.cpp")
-
+find_package(OpenCV REQUIRED)
 foreach(source_file ${examples_srcs})
   # get file name
   get_filename_component(name ${source_file} NAME_WE)
@@ -10,6 +10,7 @@ foreach(source_file ${examples_srcs})
     
   add_executable(${name} ${source_file})
   target_link_libraries(${name} ${Caffe_LINK})
+  target_link_libraries(${name} PRIVATE ${OpenCV_LIBS})
   caffe_default_properties(${name})
 
   # set back RUNTIME_OUTPUT_DIRECTORY

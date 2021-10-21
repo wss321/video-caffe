@@ -167,7 +167,7 @@ namespace caffe {
         const int new_width = video_gyro_data_param.new_width();
         const bool is_color = video_gyro_data_param.is_color();
         const string root_folder = video_gyro_data_param.root_folder();
-//        const int num_label  = this->layer_param_.video_gyro_data_param().num_label();
+        const int interval  = this->layer_param_.video_gyro_data_param().interval();
 
         Dtype* prefetch_video_data = batch->data_[0]->mutable_cpu_data();
         Dtype* prefetch_gyro_data = batch->data_[1]->mutable_cpu_data();
@@ -184,7 +184,8 @@ namespace caffe {
                                                       lines_[lines_id_].first,
                                                       lines_[lines_id_].fourth,
                                                       new_length, new_height,
-                                                      new_width, is_color, &cv_imgs);
+                                                      new_width, interval,
+                                                      is_color, &cv_imgs);
 //            LOG(INFO) << cv_imgs[0];
             CHECK(read_video_result) << "Could not load " << lines_[lines_id_].first <<
                                      " at frame " << lines_[lines_id_].second << ".";
@@ -207,6 +208,7 @@ namespace caffe {
                                                lines_[lines_id_].third,
                                                label,',');
         CHECK(read_label_result) << "Could not load " << lines_[lines_id_].third << ".";
+            CHECK_EQ(batch->data_[2]->count()/batch_size, label.total())<<"label size mismatch.";
 //            LOG(INFO) << label;
 
             read_time += timer.MicroSeconds();

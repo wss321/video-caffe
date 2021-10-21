@@ -1359,6 +1359,7 @@ message VideoGyroDataParameter {
   optional bool is_color = 12 [default = true];
   optional string root_folder = 13 [default = ""];
   optional uint32 num_label = 14 [default = 1];
+  optional uint32 interval = 15 [default = 0];
 }
 
 message WindowDataParameter {

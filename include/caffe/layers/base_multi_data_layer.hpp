@@ -43,10 +43,7 @@ namespace caffe {
     protected:
         TransformationParameter transform_param_;
         shared_ptr<DataTransformer<Dtype> > data_transformer_;
-        int label_index_;
         int num_data_;
-        int transform_data_index_;
-        bool output_labels_;
     };
 
     template <typename Dtype>

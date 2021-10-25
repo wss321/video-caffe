@@ -21,6 +21,9 @@ DB* GetDB(DataParameter::DB backend) {
     return NULL;
   }
 }
+DB* GetDB(MultiDataParameter::DB backend) {
+    return GetDB((DataParameter::DB)backend);
+}
 
 DB* GetDB(const string& backend) {
 #ifdef USE_LEVELDB

@@ -849,7 +849,7 @@ void Net<Dtype>::ToProto(NetParameter* param, bool write_diff) const {
   DLOG(INFO) << "Serializing " << layers_.size() << " layers";
   for (int i = 0; i < layers_.size(); ++i) {
     LayerParameter* layer_param = param->add_layer();
-    LOG(INFO)<<layers_[i];
+    LOG(INFO)<<layers_[i]->layer_param().name();
     layers_[i]->ToProto(layer_param, write_diff);
   }
 }

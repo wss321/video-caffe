@@ -356,6 +356,60 @@ cv::Mat DecodeDatumToCVMat(const Datum& datum, bool is_color) {
   }
   return cv_img;
 }
+void DecodeDatumToBlob(const Datum& datum, float* out_data) {
+    const string& data = datum.data();
+    std::vector<char> vec_data(data.c_str(), data.c_str() + data.size());
+    const int datum_channels = datum.channels();
+    const int datum_height = datum.height();
+    const int datum_width = datum.width();
+    const bool has_uint8 = data.size() > 0;
+
+    float datum_element;
+    int top_index=0, data_index;
+    for (int c = 0; c < datum_channels; ++c) {
+        for (int h = 0; h < datum_height; ++h) {
+            for (int w = 0; w < datum_width; ++w) {
+                data_index = (c * datum_height + h) * datum_width + w;
+
+                if (has_uint8) {
+                    datum_element =
+                            static_cast<float>(static_cast<uint8_t>(data[data_index]));
+                } else {
+                    datum_element = datum.float_data(data_index);
+                }
+                out_data[top_index] = datum_element;
+                top_index++;
+            }
+        }
+    }
+}
+void DecodeDatumToBlob(const Datum& datum, double * out_data) {
+    CHECK(datum.encoded()) << "Datum not encoded";
+    const string& data = datum.data();
+    std::vector<char> vec_data(data.c_str(), data.c_str() + data.size());
+    const int datum_channels = datum.channels();
+    const int datum_height = datum.height();
+    const int datum_width = datum.width();
+    const bool has_uint8 = data.size() > 0;
+
+    double datum_element;
+    int top_index=0, data_index;
+    for (int c = 0; c < datum_channels; ++c) {
+        for (int h = 0; h < datum_height; ++h) {
+            for (int w = 0; w < datum_width; ++w) {
+                data_index = (c * datum_height + h) * datum_width + w;
+                if (has_uint8) {
+                    datum_element =
+                            static_cast<double >(static_cast<uint8_t>(data[data_index]));
+                } else {
+                    datum_element = (double)datum.float_data(data_index);
+                }
+                out_data[top_index] = datum_element;
+                top_index++;
+            }
+        }
+    }
+}
 
 // If Datum is encoded will decoded using DecodeDatumToCVMat and CVMatToDatum
 // If Datum is not encoded will do nothing

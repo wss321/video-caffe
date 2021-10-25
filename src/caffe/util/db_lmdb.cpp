@@ -32,7 +32,15 @@ void LMDB::Open(const string& source, Mode mode) {
     MDB_CHECK(rc);
   }
 #endif
-  LOG_IF(INFO, Caffe::root_solver()) << "Opened lmdb " << source;
+  LOG_IF(INFO, Caffe::root_solver()) << "Opened lmdb:" << source;
+//  mdb_env_stat(mdb_env_, &mdb_stat_);
+  // read all data store keys
+    LMDBCursor* cursor = NewCursor();
+    cursor->SeekToFirst();
+    while (cursor->valid()){
+        keys_.push_back(cursor->key());
+        cursor->Next();
+    }
 }
 
 LMDBCursor* LMDB::NewCursor() {

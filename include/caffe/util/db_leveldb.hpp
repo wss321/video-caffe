@@ -20,6 +20,7 @@ class LevelDBCursor : public Cursor {
   }
   ~LevelDBCursor() { delete iter_; }
   virtual void SeekToFirst() { iter_->SeekToFirst(); }
+  virtual void SeekToKey(const string key) { iter_->Seek(key); }
   virtual void Next() { iter_->Next(); }
   virtual string key() { return iter_->key().ToString(); }
   virtual string value() { return iter_->value().ToString(); }
@@ -63,7 +64,7 @@ class LevelDB : public DB {
     return new LevelDBCursor(db_->NewIterator(leveldb::ReadOptions()));
   }
   virtual LevelDBTransaction* NewTransaction() {
-    return new LevelDBTransaction(db_);
+      return new LevelDBTransaction(db_);
   }
 
  private:

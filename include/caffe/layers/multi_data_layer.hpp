@@ -34,9 +34,12 @@ namespace caffe {
         bool Skip();
         virtual void load_batch(Batch<Dtype>* batch);
 
-        shared_ptr<db::DB> db_;
-        shared_ptr<db::Cursor> cursor_;
-        uint64_t offset_;
+        vector<shared_ptr<db::DB>> dbs_;
+        vector<shared_ptr<db::Cursor>> cursors_;
+        vector<uint64_t> offsets_;
+        vector<caffe::BlobShape> shapes_;
+        int num_data_;
+        bool shuffle_ = false;
     };
 
 }  // namespace caffe

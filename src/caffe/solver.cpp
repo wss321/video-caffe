@@ -69,7 +69,7 @@ void LoadNetWeights(shared_ptr<Net<Dtype> > net,
   boost::split(model_names, model_list, boost::is_any_of(","));
   for (int i = 0; i < model_names.size(); ++i) {
     boost::trim(model_names[i]);
-    LOG(INFO) << "Finetuning from " << model_names[i];
+    LOG(INFO) << "Loading weight from " << model_names[i];
     net->CopyTrainedLayersFrom(model_names[i]);
   }
 }
@@ -209,7 +209,7 @@ void Solver<Dtype>::Step(int iters) {
   while (iter_ < stop_iter) {
     // zero-init the params
     net_->ClearParamDiffs();
-    if (param_.test_interval() && iter_ % param_.test_interval() == 0
+    if (param_.test_interval() && iter_!=start_iter && iter_ % param_.test_interval() == 0
         && (iter_ > 0 || param_.test_initialization())) {
       if (Caffe::root_solver()) {
         TestAll();
@@ -223,7 +223,7 @@ void Solver<Dtype>::Step(int iters) {
     for (int i = 0; i < callbacks_.size(); ++i) {
       callbacks_[i]->on_start();
     }
-    const bool display = param_.display() && iter_ % param_.display() == 0;
+    const bool display = param_.display() && iter_!=start_iter && iter_ % param_.display() == 0;
     net_->set_debug_info(display && param_.debug_info());
     // accumulate the loss and gradient
     Dtype loss = 0;
@@ -242,11 +242,11 @@ void Solver<Dtype>::Step(int iters) {
       iteration_timer_.Start();
       iterations_last_ = iter_;
       const vector<Blob<Dtype>*>& result = net_->output_blobs();
-      int score_index = 0;
+//      int score_index = 0;
       for (int j = 0; j < result.size(); ++j) {
         const Dtype* result_vec = result[j]->cpu_data();
-        const string& output_name =
-            net_->blob_names()[net_->output_blob_indices()[j]];
+//        const string& output_name =
+//            net_->blob_names()[net_->output_blob_indices()[j]];
         const Dtype loss_weight =
             net_->blob_loss_weights()[net_->output_blob_indices()[j]];
         for (int k = 0; k < result[j]->count(); ++k) {
@@ -317,7 +317,7 @@ void Solver<Dtype>::Solve(const char* resume_file) {
   // training, for the train net we only run a forward pass as we've already
   // updated the parameters "max_iter" times -- this final pass is only done to
   // display the loss, which is computed in the forward pass.
-  if (param_.display() && iter_ % param_.display() == 0) {
+  if (param_.display() && iter_!=start_iter&& iter_ % param_.display() == 0) {
     int average_loss = this->param_.average_loss();
     Dtype loss;
     net_->Forward(&loss);
@@ -326,7 +326,7 @@ void Solver<Dtype>::Solve(const char* resume_file) {
 
     LOG(INFO) << "Iteration " << iter_ << ", loss = " << smoothed_loss_;
   }
-  if (param_.test_interval() && iter_ % param_.test_interval() == 0) {
+  if (param_.test_interval() && iter_!=start_iter && iter_% param_.test_interval() == 0) {
     TestAll();
   }
   LOG(INFO) << "Optimization Done.";
@@ -402,7 +402,7 @@ void Solver<Dtype>::Test(const int test_net_id) {
   for (int i = 0; i < test_score.size(); ++i) {
     const int output_blob_index =
         test_net->output_blob_indices()[test_score_output_id[i]];
-    const string& output_name = test_net->blob_names()[output_blob_index];
+//    const string& output_name = test_net->blob_names()[output_blob_index];
     const Dtype loss_weight = test_net->blob_loss_weights()[output_blob_index];
     ostringstream loss_msg_stream;
     const Dtype mean_score = test_score[i] / param_.test_iter(test_net_id);

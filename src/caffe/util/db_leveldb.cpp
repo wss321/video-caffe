@@ -16,6 +16,13 @@ void LevelDB::Open(const string& source, Mode mode) {
   CHECK(status.ok()) << "Failed to open leveldb " << source
                      << std::endl << status.ToString();
   LOG(INFO) << "Opened leveldb " << source;
+    // read all data store keys
+    LevelDBCursor* cursor = NewCursor();
+    cursor->SeekToFirst();
+    while (cursor->valid()){
+        keys_.push_back(cursor->key());
+        cursor->Next();
+    }
 }
 
 }  // namespace db

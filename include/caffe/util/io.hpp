@@ -146,10 +146,11 @@ cv::Mat DecodeDatumToCVMatNative(const Datum& datum);
 cv::Mat DecodeDatumToCVMat(const Datum& datum, bool is_color);
 
 void CVMatToDatum(const cv::Mat& cv_img, Datum* datum);
-
+void DecodeDatumToBlob(const Datum& datum, float* out_data);
+void DecodeDatumToBlob(const Datum& datum, double * out_data);
 bool ReadVideoToCVMat(const string& filename,
-    const int start_frame, const int length, const int height, const int width,
-    const bool is_color, std::vector<cv::Mat>* cv_imgs);
+const int start_frame, const int length, const int height, const int width,
+const bool is_color, std::vector<cv::Mat>* cv_imgs);
 
 bool ReadVideoToCVMat(const string& filename,
                       const int start_frame, const int length, const int height, const int width, const int interval,

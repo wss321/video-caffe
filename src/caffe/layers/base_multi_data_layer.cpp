@@ -15,24 +15,12 @@ namespace caffe {
     BaseMultiDataLayer<Dtype>::BaseMultiDataLayer(const LayerParameter& param)
             : Layer<Dtype>(param),
               transform_param_(param.transform_param()),
-              transform_data_index_(param.multi_data_param().transform_data_index()),
               num_data_(param.multi_data_param().num_data()){
-//                  int label_index = param.multi_data_param().label_index();
-//        if (label_index<0){
-//            CHECK_GT(num_data_ + label_index, -1)<<"num_data + label_index must not less than 0";
-//            label_index_=num_data_ + label_index;
-//        }
-
     }
 
     template <typename Dtype>
     void BaseMultiDataLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
                                           const vector<Blob<Dtype>*>& top) {
-        if (top.size() < num_data_) {
-            output_labels_ = false;
-        } else {
-            output_labels_ = true;
-        }
         data_transformer_.reset(
                 new DataTransformer<Dtype>(transform_param_, this->phase_));
         data_transformer_->InitRand();
@@ -65,13 +53,13 @@ namespace caffe {
     template <typename Dtype>
     void BaseMultiPrefetchingDataLayer<Dtype>::LayerSetUp(
             const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
+
         BaseMultiDataLayer<Dtype>::LayerSetUp(bottom, top);
 
         // Before starting the prefetch thread, we make cpu_data and gpu_data
         // calls so that the prefetch thread does not accidentally make simultaneous
         // cudaMalloc calls when the main thread is running. In some GPUs this
         // seems to cause failures if we do not so.
-
         for (int i = 0; i < prefetch_.size(); ++i){
             for (int j = 0; j < prefetch_[i]->data_.size(); ++j){
                 prefetch_[i]->data_[j]->mutable_cpu_data();

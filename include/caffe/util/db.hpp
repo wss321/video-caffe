@@ -15,6 +15,7 @@ class Cursor {
   Cursor() { }
   virtual ~Cursor() { }
   virtual void SeekToFirst() = 0;
+  virtual void SeekToKey(const string key) = 0;
   virtual void Next() = 0;
   virtual string key() = 0;
   virtual string value() = 0;
@@ -41,13 +42,21 @@ class DB {
   virtual void Close() = 0;
   virtual Cursor* NewCursor() = 0;
   virtual Transaction* NewTransaction() = 0;
+  virtual size_t GetDBLength(){
+        return keys_.size();
+    };
+  virtual string GetKey(int index){
+      CHECK_LE(index, keys_.size())<<"index must less than number of data.";
+      return keys_[index];
+  };
+
+  std::vector<string> keys_;
 
   DISABLE_COPY_AND_ASSIGN(DB);
 };
-
-DB* GetDB(DataParameter::DB backend);
+DB* GetDB(DataParameter_DB backend);
+DB* GetDB(MultiDataParameter_DB backend);
 DB* GetDB(const string& backend);
-
 }  // namespace db
 }  // namespace caffe
 

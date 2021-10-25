@@ -26,6 +26,18 @@ class LMDBCursor : public Cursor {
     mdb_txn_abort(mdb_txn_);
   }
   virtual void SeekToFirst() { Seek(MDB_FIRST); }
+  virtual void SeekToKey(const string key) {
+      MDB_val target_key;
+      target_key.mv_data = (void*) key.c_str();
+      target_key.mv_size = sizeof(char) * key.length();
+      int mdb_status = mdb_cursor_get(mdb_cursor_, &target_key, &mdb_value_, MDB_SET);
+      if (mdb_status == MDB_NOTFOUND) {
+          valid_ = false;
+      } else {
+          MDB_CHECK(mdb_status);
+          valid_ = true;
+      }
+  }
   virtual void Next() { Seek(MDB_NEXT); }
   virtual string key() {
     return string(static_cast<const char*>(mdb_key_.mv_data), mdb_key_.mv_size);
@@ -87,6 +99,7 @@ class LMDB : public DB {
  private:
   MDB_env* mdb_env_;
   MDB_dbi mdb_dbi_;
+//  MDB_stat mdb_stat_;
 };
 
 }  // namespace db

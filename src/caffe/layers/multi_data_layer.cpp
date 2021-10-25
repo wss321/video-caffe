@@ -64,8 +64,8 @@ namespace caffe {
 
             // Use data_transformer to infer the expected blob shape from datum.
             vector<int> top_shape(shapes_[d].dim_size() + 1);
-            for (int i = 0; i < shapes_[d].dim_size(); ++i) {
-                top_shape[i + 1] = shapes_[d].dim(d);
+            for (int dim_i = 0; dim_i < shapes_[d].dim_size(); ++dim_i) {
+                top_shape[dim_i + 1] = shapes_[d].dim(dim_i);
             }
             top_shape[0] = batch_size;
             top[d]->Reshape(top_shape);
@@ -124,7 +124,7 @@ namespace caffe {
         double read_time = 0;
         CPUTimer timer;
         for (int i = 0; i < batch->data_.size(); ++i) {
-            CHECK(batch->data_[0]->count());
+            CHECK(batch->data_[i]->count());
         }
 
         const int batch_size = this->layer_param_.multi_data_param().batch_size();
@@ -145,8 +145,8 @@ namespace caffe {
                     // on single input batches allows for inputs of varying dimension.
                     // Use data_transformer to infer the expected blob shape from datum.
                     vector<int> top_shape(shapes_[d].dim_size() + 1);
-                    for (int i = 0; i < shapes_[d].dim_size(); ++i) {
-                        top_shape[i + 1] = shapes_[d].dim(d);
+                    for (int dim_i = 0; dim_i < shapes_[d].dim_size(); ++dim_i) {
+                        top_shape[dim_i + 1] = shapes_[d].dim(dim_i);
                     }
                     top_shape[0] = batch_size;
                     batch->data_[d]->Reshape(top_shape);

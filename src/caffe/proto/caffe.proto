@@ -269,8 +269,8 @@ message SolverState {
 }
 
 enum Phase {
-   TRAIN = 0;
-   TEST = 1;
+  TRAIN = 0;
+  TEST = 1;
 }
 
 message NetState {
@@ -436,6 +436,7 @@ message LayerParameter {
   optional VideoGyroDataParameter video_gyro_data_param = 7786;
   optional WordvecParameter wordvec_param = 7787;
   optional LSTMV3Parameter lstmv3_param = 7788;
+  optional  GRUCellParameter gru_cell_param = 7789;
 }
 
 // Message that stores parameters used to apply transformation
@@ -1054,7 +1055,7 @@ message AttentionParameter {
   // Whether to enable displaying debug_info in the unrolled recurrent net.
   optional bool debug_info = 4 [default = false];
   optional bool bias_term = 5 [default = false];
-//  optional uint32 n_head = 6 [default = 1];
+  //  optional uint32 n_head = 6 [default = 1];
 }
 
 message TensorTransposeParameter {
@@ -1076,6 +1077,12 @@ message LSTMV3Parameter {
   optional FillerParameter forget_gate_weight_filler = 4; // The filler for the weight
   optional FillerParameter output_gate_weight_filler = 5; // The filler for the weight
   optional bool tanh_hidden = 7 [default = false];
+}
+message GRUCellParameter {
+  optional uint32 num_cells = 1;
+  optional bool bias_term = 2 [default = true];
+  optional FillerParameter weight_filler = 3; // The filler for weight
+  optional FillerParameter bias_filler = 4; // The filler for the bias
 }
 // Message that stores parameters used by LSTMParameter
 message GRUParameter {

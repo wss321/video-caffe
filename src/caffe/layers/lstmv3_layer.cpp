@@ -108,14 +108,9 @@ namespace caffe {
         next_state_tot_diff_buffer_->Reshape(vector<int>{num_, channels_});
         tanh_mem_buffer_->Reshape(vector<int>{num_, channels_});
         dldg_buffer_->Reshape(vector<int>{num_, channels_});
-        vector<int> shape;
-        shape.push_back(num_);
-        shape.push_back(1);
-        shape.push_back(channels_);
-//        shape.push_back(1);
-//        shape.push_back(1);
-        top[0]->Reshape(shape);
-        top[1]->Reshape(shape);
+
+        top[0]->Reshape(bottom[1]->shape());
+        top[1]->Reshape(bottom[1]->shape());
     }
 
     template <typename Dtype>

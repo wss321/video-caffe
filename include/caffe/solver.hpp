@@ -96,6 +96,7 @@ class Solver {
 
   // Make and apply the update value for the current iteration.
   virtual void ApplyUpdate() = 0;
+  void TestIter(const int test_net_id = 0);
 
  protected:
   string SnapshotFilename(const string& extension);

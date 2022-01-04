@@ -62,7 +62,6 @@ namespace caffe {
             Datum datum;
             datum.ParseFromString(cursors_[d]->value());
 
-            // Use data_transformer to infer the expected blob shape from datum.
             vector<int> top_shape(shapes_[d].dim_size() + 1);
             for (int dim_i = 0; dim_i < shapes_[d].dim_size(); ++dim_i) {
                 top_shape[dim_i + 1] = shapes_[d].dim(dim_i);

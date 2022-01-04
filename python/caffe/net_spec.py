@@ -104,7 +104,7 @@ class Function(object):
     def __init__(self, type_name, inputs, params):
         self.type_name = type_name
         for index, input in enumerate(inputs):
-            if not isinstance(input, Top):
+            if not isinstance(input, Top) and not isinstance(input, list):
                 raise TypeError('%s input %d is not a Top (type is %s)' %
                                 (type_name, index, type(input)))
         self.inputs = inputs
@@ -137,8 +137,13 @@ class Function(object):
             return
         bottom_names = []
         for inp in self.inputs:
-            inp._to_proto(layers, names, autonames)
-            bottom_names.append(layers[inp.fn].top[inp.n])
+            if isinstance(inp, list):
+                for inp_i in inp:
+                    inp_i._to_proto(layers, names, autonames)
+                    bottom_names.append(layers[inp_i.fn].top[inp_i.n])
+            else:
+                inp._to_proto(layers, names, autonames)
+                bottom_names.append(layers[inp.fn].top[inp.n])
         layer = caffe_pb2.LayerParameter()
         layer.type = self.type_name
         layer.bottom.extend(bottom_names)
@@ -157,7 +162,7 @@ class Function(object):
             else:
                 try:
                     assign_proto(getattr(layer,
-                        _param_names[self.type_name] + '_param'), k, v)
+                                         _param_names[self.type_name] + '_param'), k, v)
                 except (AttributeError, KeyError):
                     assign_proto(layer, k, v)
 
@@ -172,11 +177,20 @@ class NetSpec(object):
 
     def __init__(self):
         super(NetSpec, self).__setattr__('tops', OrderedDict())
+        # self.tops = OrderedDict()
 
     def __setattr__(self, name, value):
-        self.tops[name] = value
+        if name in self.tops.keys():
+            if value == self.tops[name]:
+                return
+            if not isinstance(self.tops[name], list):
+                self.tops[name] = [self.tops[name]]
+            self.tops[name].append(value)
+        else:
+            self.tops[name] = value
 
     def __getattr__(self, name):
+
         return self.tops[name]
 
     def __setitem__(self, key, value):
@@ -186,11 +200,22 @@ class NetSpec(object):
         return self.__getattr__(item)
 
     def to_proto(self):
-        names = {v: k for k, v in six.iteritems(self.tops)}
+        # names = {v: k for k, v in six.iteritems(self.tops)}
+        names = {}
+        for k, v in six.iteritems(self.tops):
+            if not isinstance(v, list):
+                names.update({v: k})
+            else:
+                for v_i in v:
+                    names.update({v_i: k})
         autonames = Counter()
         layers = OrderedDict()
         for name, top in six.iteritems(self.tops):
-            top._to_proto(layers, names, autonames)
+            if isinstance(top, list):
+                for top_i in top:
+                    top_i._to_proto(layers, names, autonames)
+            else:
+                top._to_proto(layers, names, autonames)
         net = caffe_pb2.NetParameter()
         net.layer.extend(layers.values())
         return net
@@ -210,6 +235,7 @@ class Layers(object):
                 return fn.tops[0]
             else:
                 return fn.tops
+
         return layer_fn
 
 
@@ -219,10 +245,11 @@ class Parameters(object):
     to specify max pooling."""
 
     def __getattr__(self, name):
-       class Param:
+        class Param:
             def __getattr__(self, param_name):
                 return getattr(getattr(caffe_pb2, name + 'Parameter'), param_name)
-       return Param()
+
+        return Param()
 
 
 _param_names = param_name_dict()

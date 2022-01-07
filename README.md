@@ -1,5 +1,13 @@
 # Video-Caffe: Caffe with C3D implementation and video reader
 
+## New
+1. GRU layer
+2. GRUCell layer
+3. MatrixProduction layer
+4. MultiData layer
+5. VideoGyro layer
+
+
 [![Build Status](https://travis-ci.org/chuckcho/video-caffe.svg?branch=master)](https://travis-ci.org/chuckcho/video-caffe)
 
 This is 3D convolution (C3D) and video reader implementation in the latest Caffe (Dec 2016). The original [Facebook C3D implementation](https://github.com/facebook/C3D/) is branched out from Caffe on July 17, 2014 with git commit [b80fc86](https://github.com/BVLC/caffe/tree/b80fc862952ba4e068cf74acc0823785ce1cc0e9), and has not been rebased with the original Caffe, hence missing out quite a few new features in the recent Caffe. I therefore pulled in C3D concept and an accompanying video reader and applied to the latest Caffe, and will try to rebase this repo with the upstream whenever there is a new important feature. This repo is rebased on [99bd997](https://github.com/BVLC/caffe/commit/99bd99795dcdf0b1d3086a8d67ab1782a8a08383), on Aug`21 2018.

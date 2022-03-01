@@ -254,7 +254,7 @@ message SolverParameter {
   // If command line --weights parameter is specified, it has higher priority
   // and overwrites this one(s).
   // If --snapshot command line parameter is specified, this one(s) are ignored.
-  // If several model files are expected, they can be listed in a one 
+  // If several model files are expected, they can be listed in a one
   // weights parameter separated by ',' (like in a command string) or
   // in repeated weights parameters separately.
   repeated string weights = 42;
@@ -437,6 +437,7 @@ message LayerParameter {
   optional WordvecParameter wordvec_param = 7787;
   optional LSTMV3Parameter lstmv3_param = 7788;
   optional  GRUCellParameter gru_cell_param = 7789;
+  optional AxpbParameter axpb_param = 7790;
 }
 
 // Message that stores parameters used to apply transformation
@@ -1246,6 +1247,11 @@ message ScaleParameter {
   // may be more efficient).  Initialized with bias_filler (defaults to 0).
   optional bool bias_term = 4 [default = false];
   optional FillerParameter bias_filler = 5;
+}
+
+message AxpbParameter {
+  optional double a = 1 [default = 1.0];
+  optional double b = 2 [default = 0.0];
 }
 
 message SigmoidParameter {

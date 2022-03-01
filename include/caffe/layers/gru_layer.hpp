@@ -28,6 +28,9 @@ namespace caffe {
                              const vector<Blob<Dtype>*>& top);
 
         virtual inline const char* type() const { return "GRU"; }
+        virtual inline int MinBottomBlobs() const { return 1; }
+        virtual inline int MaxBottomBlobs() const { return 1; }
+        virtual inline int ExactNumTopBlobs() const { return 1; }
 
     protected:
         virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
@@ -44,7 +47,7 @@ namespace caffe {
         int T_; // length of sequence
         int N_; // batch size
 
-        Dtype clipping_threshold_; // threshold for clipped gradient
+//        Dtype clipping_threshold_; // threshold for clipped gradient
         Blob<Dtype> bias_multiplier_;
 
         Blob<Dtype> top_;       // output values
@@ -61,33 +64,6 @@ namespace caffe {
         Blob<Dtype> h_to_gate_m_; // W_om * m_t
         Blob<Dtype> d_ph_;  // dL/dh_{t-1}
     };
-//    template <typename Dtype>
-//    class GRUUnitLayer : public Layer<Dtype> {
-//    public:
-//        explicit GRUUnitLayer(const LayerParameter &param)
-//                : Layer<Dtype>(param) {}
-//
-//        virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
-//                             const vector<Blob<Dtype> *> &top);
-//
-//        virtual inline const char *type() const { return "GRUUnit"; }
-//
-//    protected:
-//        virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
-//                                 const vector<Blob<Dtype> *> &top);
-//
-////        virtual void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
-////                                 const vector<Blob<Dtype> *> &top);
-//
-//        virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-//                                  const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
-//
-////        virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-////                                  const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
-//    private:
-//        int hidden_dim_;
-//        Blob<Dtype> X_acts_;
-//    };
 
 }  // namespace caffe
 #endif //CAFFE_GRU_LAYER_HPP

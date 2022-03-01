@@ -22,11 +22,9 @@ namespace caffe {
     }
 
     template<typename Dtype>
-    __global__ void ClipAdd(const int nthreads, const int dim, int t,
-                            const Dtype *clip, const Dtype *add_vec, Dtype *data) {
+    __global__ void ClipAdd(const int nthreads, int t, const Dtype *add_vec, Dtype *data) {
         CUDA_KERNEL_LOOP(index, nthreads) {
-            const int n = index / dim;
-            const Dtype clip_t = clip ? clip[n] : Dtype(t > 0);
+            const Dtype clip_t = Dtype(t > 0);
             data[index] += clip_t * add_vec[index];
         }
     }
@@ -114,11 +112,6 @@ namespace caffe {
         CHECK_EQ(top[0]->gpu_data(), top_.gpu_data());
         Dtype *top_data = top_.mutable_cpu_data();
         const Dtype *bottom_data = bottom[0]->gpu_data();
-        const Dtype *clip = NULL;
-        if (bottom.size() > 1) {
-            clip = bottom[1]->gpu_data();
-            CHECK_EQ(bottom[1]->shape(0) * bottom[1]->shape(1), bottom[1]->count());
-        }
 
         const Dtype *weight_zr_x = this->blobs_[0]->gpu_data();//3
         const Dtype *weight_h = this->blobs_[1]->gpu_data();//2
@@ -152,8 +145,6 @@ namespace caffe {
             Dtype *gate_t = gate_data + zro_.offset(t);
             Dtype *m_t = m_data + m_.offset(t);
             Dtype *o_hat_t = o_hat_data + o_hat_.offset(t);
-
-            const Dtype *clip_t = clip ? clip + bottom[1]->offset(t) : NULL;
             const Dtype *h_t_1 = t > 0 ? (top_data + top_.offset(t - 1)) : h_0_.gpu_data();
 
             // Hidden-to-hidden propagation
@@ -163,7 +154,7 @@ namespace caffe {
                                   h_t_1, weight_h, (Dtype) 0., h_to_gate_zr);
 
             ClipAdd<Dtype><<<CAFFE_GET_BLOCKS(2 * N_ * H_), CAFFE_CUDA_NUM_THREADS>>>(
-                    2 * N_ * H_, 2 * H_, t, clip_t, h_to_gate_zr_.gpu_data(), zr_hat_t);
+                    2 * N_ * H_, t, h_to_gate_zr_.gpu_data(), zr_hat_t);
             CUDA_POST_KERNEL_CHECK;
             GRUForwardZRM<Dtype><<<CAFFE_GET_BLOCKS(N_ * H_), CAFFE_CUDA_NUM_THREADS>>>(
                     N_ * H_, H_, zr_hat_t, h_t_1, gate_t, m_t);
@@ -172,7 +163,7 @@ namespace caffe {
                                   m_t, weight_om, (Dtype) 0., h_to_gate_m);
 
             ClipAdd<Dtype><<<CAFFE_GET_BLOCKS(N_ * H_), CAFFE_CUDA_NUM_THREADS>>>(
-                    N_ * H_, H_, t, clip_t, h_to_gate_m_.gpu_data(), o_hat_t);
+                    N_ * H_, t, h_to_gate_m_.gpu_data(), o_hat_t);
             CUDA_POST_KERNEL_CHECK;
             GRUForwardOH<Dtype><<<CAFFE_GET_BLOCKS(N_ * H_), CAFFE_CUDA_NUM_THREADS>>>(
                     N_ * H_, H_, o_hat_t, h_t_1, gate_t, h_t);
@@ -187,11 +178,6 @@ namespace caffe {
                                        const vector<Blob<Dtype> *> &bottom) {
         const Dtype *top_data = top_.gpu_data();
         const Dtype *bottom_data = bottom[0]->gpu_data();
-        const Dtype *clip = NULL;
-        if (bottom.size() > 1) {
-            clip = bottom[1]->gpu_data();
-            CHECK_EQ(bottom[1]->shape(0) * bottom[1]->shape(1), bottom[1]->count());
-        }
         const Dtype *weight_zr_x = this->blobs_[0]->gpu_data();
         const Dtype *weight_zr_h = this->blobs_[1]->gpu_data();
         const Dtype *weight_om = this->blobs_[2]->gpu_data();
@@ -219,7 +205,6 @@ namespace caffe {
             Dtype *dh_t_1 = t > 0 ? top_diff + top_.offset(t - 1) : h_0_.mutable_gpu_diff();
 
             const Dtype *h_t = top_data + top_.offset(t);
-            const Dtype *clip_t = clip ? clip + bottom[1]->offset(t) : NULL;
             const Dtype *zro_t = zro_data + zro_.offset(t);
             const Dtype *zr_hat_t = zr_hat_data + zr_hat_.offset(t);
             const Dtype *h_t_1 = t > 0 ? (h_t - top_.offset(1)) : h_0_.gpu_data();

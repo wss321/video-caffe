@@ -21,7 +21,7 @@ namespace caffe {
     template<typename Dtype>
     void GRULayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                                      const vector<Blob<Dtype> *> &top) {
-        clipping_threshold_ = this->layer_param_.gru_param().clipping_threshold();
+//        clipping_threshold_ = this->layer_param_.gru_param().clipping_threshold();
         T_ = bottom[0]->shape(0);
         N_ = bottom[0]->shape(1); // batch_size
         H_ = this->layer_param_.gru_param().num_output(); // number of hidden units
@@ -131,11 +131,7 @@ namespace caffe {
         CHECK_EQ(top[0]->cpu_data(), top_.cpu_data());
         Dtype *top_data = top_.mutable_cpu_data();
         const Dtype *bottom_data = bottom[0]->cpu_data();
-        const Dtype *clip = NULL;
-        if (bottom.size() > 1) {
-            clip = bottom[1]->cpu_data();
-            CHECK_EQ(bottom[1]->shape(0) * bottom[1]->shape(1), bottom[1]->count());
-        }
+
         const Dtype *weight_zr_x = this->blobs_[0]->cpu_data();//3
         const Dtype *weight_h = this->blobs_[1]->cpu_data();//2
         const Dtype *weight_om = this->blobs_[2]->cpu_data();//1
@@ -149,12 +145,6 @@ namespace caffe {
         Dtype *h_to_gate_m = h_to_gate_m_.mutable_cpu_data(); // 1
         Dtype *o_hat_data = o_hat_.mutable_cpu_data();
 
-        // Initialize previous state
-//        if (clip) {
-//            caffe_copy(h_0_.count(), h_T_.cpu_data(), h_0_.mutable_cpu_data());
-//        } else {
-//            caffe_set(h_0_.count(), (Dtype)0., h_0_.mutable_cpu_data());
-//        }
         caffe_set(h_0_.count(), (Dtype) 0., h_0_.mutable_cpu_data());
 
         // Compute input to hidden forward propagation
@@ -183,7 +173,6 @@ namespace caffe {
             Dtype *m_t = m_data + m_.offset(t);
             Dtype *o_hat_data_t = o_hat_data + o_hat_.offset(t);
 
-            const Dtype *clip_t = clip ? clip + bottom[1]->offset(t) : NULL;
             const Dtype *h_t_1 = t > 0 ? (top_data + top_.offset(t - 1)) : h_0_.cpu_data();
 
             // Hidden-to-hidden propagation
@@ -193,8 +182,7 @@ namespace caffe {
                                   h_t_1, weight_h, (Dtype) 0., h_to_gate_zr);
 
             for (int n = 0; n < N_; ++n) { //for batch
-                const bool cont = clip_t ? clip_t[n] : t > 0;
-                if (cont) {
+                if (t > 0) {
                     caffe_add(2 * H_, zr_hat_t, h_to_gate_t,
                               zr_hat_t); //Wz*xt + b  and Wr*xh_{t-1}
                 }
@@ -223,15 +211,13 @@ namespace caffe {
             h_to_gate_t = h_to_gate_m;
             o_hat_data_t = o_hat_data + o_hat_.offset(t);
 
-            clip_t = clip ? clip + bottom[1]->offset(t) : NULL;
             h_t_1 = t > 0 ? (h_t - top_.offset(1)) : h_0_.cpu_data();
 
             // h_to_gate_m = W_om*mt
             caffe_cpu_gemm<Dtype>(CblasNoTrans, CblasTrans, N_, H_, H_, (Dtype) 1.,
                                   m_t, weight_om, (Dtype) 0., h_to_gate_m);
             for (int n = 0; n < N_; ++n) { //for batch
-                const bool cont = clip_t ? clip_t[n] : t > 0;
-                if (cont) {
+                if (t > 0) {
                     caffe_add(H_, o_hat_data_t, h_to_gate_t, o_hat_data_t); //W_om*mt + (Wox * xt + b)
                 }
 
@@ -267,13 +253,8 @@ namespace caffe {
                                        const vector<Blob<Dtype> *> &bottom) {
         const Dtype *top_data = top_.cpu_data();
         const Dtype *bottom_data = bottom[0]->cpu_data();
-        const Dtype *clip = NULL;
-        if (bottom.size() > 1) {
-            clip = bottom[1]->cpu_data();
-            CHECK_EQ(bottom[1]->shape(0) * bottom[1]->shape(1), bottom[1]->count());
-        }
         const Dtype *weight_zr_x = this->blobs_[0]->cpu_data();
-        const Dtype *weight_zr_h = this->blobs_[1]->cpu_data();
+//        const Dtype *weight_zr_h = this->blobs_[1]->cpu_data();
         const Dtype *weight_om = this->blobs_[2]->cpu_data();
         const Dtype *weight_ox = this->blobs_[3]->cpu_data();
         const Dtype *zro_data = zro_.cpu_data();
@@ -296,7 +277,6 @@ namespace caffe {
             Dtype *d_ph = d_ph_.mutable_cpu_data();
 
             const Dtype *h_t = top_data + top_.offset(t);
-            const Dtype *clip_t = clip ? clip + bottom[1]->offset(t) : NULL;
             const Dtype *zro_t = zro_data + zro_.offset(t);
             const Dtype *zr_hat_t = zr_hat_data + zr_hat_.offset(t);
             const Dtype *h_t_1 = t > 0 ? (h_t - top_.offset(1)) : h_0_.cpu_data();

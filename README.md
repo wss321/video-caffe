@@ -6,7 +6,8 @@
 3. MatrixProduction layer
 4. MultiData layer
 5. VideoGyro layer
-
+6. Axpb Layer
+7. Detach Layer
 
 [![Build Status](https://travis-ci.org/chuckcho/video-caffe.svg?branch=master)](https://travis-ci.org/chuckcho/video-caffe)
 

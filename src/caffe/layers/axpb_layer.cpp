@@ -51,7 +51,7 @@ void AxpbLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 }
 
 #ifdef CPU_ONLY
-STUB_GPU(ScaleLayer);
+STUB_GPU(AxpbLayer);
 #endif
 
 INSTANTIATE_CLASS(AxpbLayer);

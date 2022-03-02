@@ -53,7 +53,7 @@ namespace caffe {
         input_data_dim_ = num_axes_ == 3 ? bottom[0]->shape(2) : bottom[0]->shape(1);
 
         CHECK_EQ(feature_dim_, bottom[1]->shape(num_axes_-1)) <<
-                                                    "Number of input memory channels must match the number of lstm mem_cells";
+                                                    "Number of input memory channels must match the number of gru mem_cells";
         M_ = batch_size_;
         N_ = feature_dim_;
         K_ = input_data_dim_;

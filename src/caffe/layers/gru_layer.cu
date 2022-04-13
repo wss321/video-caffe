@@ -24,8 +24,7 @@ namespace caffe {
     template<typename Dtype>
     __global__ void ClipAdd(const int nthreads, int t, const Dtype *add_vec, Dtype *data) {
         CUDA_KERNEL_LOOP(index, nthreads) {
-            const Dtype clip_t = Dtype(t > 0);
-            data[index] += clip_t * add_vec[index];
+            data[index] += add_vec[index];
         }
     }
 
@@ -39,9 +38,9 @@ namespace caffe {
             Dtype *offset_gate = gate + 3 * H * n;
             const Dtype *offset_zr = pre_gate + 2 * H * n;
 
-            offset_gate[d] = sigmoid(offset_zr[index]);
+            offset_gate[d] = sigmoid(offset_zr[d]);
             offset_gate[H + d] = sigmoid(offset_zr[H + d]);
-            m[index] = gate[d + H] * h_t_1[index];// mt = rt .* h_{t-1)
+            m[index] = offset_gate[H + d] * h_t_1[index];// mt = rt .* h_{t-1)
         }
     }
 
@@ -94,13 +93,12 @@ namespace caffe {
 
     template<typename Dtype>
     __global__ void GRUForwardOH(const int nthreads, const int H,
-                                 const Dtype *pre_gate, const Dtype *h_t_1, Dtype *gate, Dtype *h) {
+                                 const Dtype *o_hat_t, const Dtype *h_t_1, Dtype *gate, Dtype *h) {
         CUDA_KERNEL_LOOP(index, nthreads) {
             const int n = index / H;
             const int d = index % H;
             Dtype *offset_gate = gate + 3 * H * n;
-//            const Dtype *offset_m = pre_gate + H * n;
-            offset_gate[2 * H + d] = tanh(pre_gate[index]);
+            offset_gate[2 * H + d] = tanh(o_hat_t[index]);
             h[index] = (Dtype(1.0) - offset_gate[d]) * offset_gate[2 * H + d] + offset_gate[d] * h_t_1[index];
         }
     }
@@ -139,6 +137,7 @@ namespace caffe {
         caffe_gpu_gemm<Dtype>(CblasNoTrans, CblasNoTrans, T_ * N_, H_, 1, (Dtype) 1.,
                               bias_multiplier_.gpu_data(), bias2, (Dtype) 1., o_hat_data);
         // Compute recurrent forward propagation
+
         for (int t = 0; t < T_; ++t) {
             Dtype *h_t = top_data + top_.offset(t);
             Dtype *zr_hat_t = zr_hat_data + zr_hat_.offset(t);

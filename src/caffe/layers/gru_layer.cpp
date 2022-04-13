@@ -37,59 +37,47 @@ namespace caffe {
 
             // input-to-hidden weights
             // Intialize the weight
-            vector<int> weight_shape;
-            weight_shape.push_back(2 * H_);//Wzx Wrx
-            weight_shape.push_back(I_);
-            this->blobs_[0].reset(new Blob<Dtype>(weight_shape));
+            vector<int> weight_shape1{2 * H_, I_};//Wzx Wrx
+            this->blobs_[0].reset(new Blob<Dtype>(weight_shape1));
             weight_filler->Fill(this->blobs_[0].get());
 
             // hidden-to-hidden weights
             // Intialize the weight
 
-            weight_shape.clear();
-            weight_shape.push_back(2 * H_); //Wzh Wrh
-            weight_shape.push_back(H_);
-            this->blobs_[1].reset(new Blob<Dtype>(weight_shape));
+            vector<int> weight_shape2{2 * H_, H_};//Wzh Wrh
+            this->blobs_[1].reset(new Blob<Dtype>(weight_shape2));
             weight_filler->Fill(this->blobs_[1].get());
 
             // r_t and h_{t-1} weights
             // Intialize the weight
 
-            weight_shape.clear();
-            weight_shape.push_back(H_);
-            weight_shape.push_back(H_);
+            vector<int> weight_shape3{H_, H_};
             //W_om
-            this->blobs_[2].reset(new Blob<Dtype>(weight_shape));
+            this->blobs_[2].reset(new Blob<Dtype>(weight_shape3));
             weight_filler->Fill(this->blobs_[2].get());
 
             // Wox
-            this->blobs_[3].reset(new Blob<Dtype>(weight_shape));
+            this->blobs_[3].reset(new Blob<Dtype>(weight_shape3));
             weight_filler->Fill(this->blobs_[3].get());
 
             // If necessary, intiialize and fill the bias term
-            vector<int> bias_shape(1, 2 * H_);
-            this->blobs_[4].reset(new Blob<Dtype>(bias_shape));
+            this->blobs_[4].reset(new Blob<Dtype>(vector<int>{2 * H_})); // Bz, Br
             shared_ptr<Filler<Dtype> > bias_filler(GetFiller<Dtype>(
                     this->layer_param_.gru_param().bias_filler()));
             bias_filler->Fill(this->blobs_[4].get());
 
-            this->blobs_[5].reset(new Blob<Dtype>(vector<int>{1, H_}));
+            this->blobs_[5].reset(new Blob<Dtype>(vector<int>{1, H_})); // Bo
             bias_filler->Fill(this->blobs_[5].get());
 
 
         }  // parameter initialization
         this->param_propagate_down_.resize(this->blobs_.size(), true);
 
-        vector<int> cell_shape;
-        cell_shape.push_back(N_);
-        cell_shape.push_back(H_);
+        vector<int> cell_shape{N_, H_};
         h_0_.Reshape(cell_shape);
         d_ph_.Reshape(cell_shape);
 
-        vector<int> pregate_shape;
-        pregate_shape.push_back(N_);
-        //        gate_shape.push_back(2);
-        pregate_shape.push_back(2 * H_);
+        vector<int> pregate_shape{N_, 2 * H_};
         h_to_gate_zr_.Reshape(pregate_shape);
         h_to_gate_m_.Reshape(cell_shape);
     }
@@ -97,19 +85,12 @@ namespace caffe {
     template<typename Dtype>
     void GRULayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
                                   const vector<Blob<Dtype> *> &top) {
-        vector<int> top_shape;
-        top_shape.push_back(T_);
-        top_shape.push_back(N_);
-        top_shape.push_back(H_);
+        vector<int> top_shape{T_, N_, H_};
         top[0]->Reshape(top_shape);
         o_hat_.Reshape(top_shape);
 
         // Gate initialization
-        vector<int> gate_shape;
-        gate_shape.push_back(T_);
-        gate_shape.push_back(N_);
-        gate_shape.push_back(3);
-        gate_shape.push_back(H_);
+        vector<int> gate_shape{T_, N_, 3, H_};
         zr_hat_.Reshape(vector<int>{T_, N_, 2, H_});
         zro_.Reshape(gate_shape);
 
@@ -148,12 +129,13 @@ namespace caffe {
         caffe_set(h_0_.count(), (Dtype) 0., h_0_.mutable_cpu_data());
 
         // Compute input to hidden forward propagation
-        //Wzx * xt + b
+        //Wzx * xt + bz
+        //Wrx * xt + br
         caffe_cpu_gemm<Dtype>(CblasNoTrans, CblasTrans, T_ * N_, 2 * H_, I_, (Dtype) 1.,
                               bottom_data, weight_zr_x, (Dtype) 0., zr_hat_data);
         caffe_cpu_gemm<Dtype>(CblasNoTrans, CblasNoTrans, T_ * N_, 2 * H_, 1, (Dtype) 1.,
                               bias_multiplier_.cpu_data(), bias1, (Dtype) 1., zr_hat_data);
-
+        //Wox * xt + bo
         caffe_cpu_gemm<Dtype>(CblasNoTrans, CblasTrans, T_ * N_, H_, I_, (Dtype) 1.,
                               bottom_data, weight_ox, (Dtype) 0., o_hat_data);
         caffe_cpu_gemm<Dtype>(CblasNoTrans, CblasNoTrans, T_ * N_, H_, 1, (Dtype) 1.,
@@ -182,10 +164,8 @@ namespace caffe {
                                   h_t_1, weight_h, (Dtype) 0., h_to_gate_zr);
 
             for (int n = 0; n < N_; ++n) { //for batch
-                if (t > 0) {
-                    caffe_add(2 * H_, zr_hat_t, h_to_gate_t,
+                caffe_add(2 * H_, zr_hat_t, h_to_gate_t,
                               zr_hat_t); //Wz*xt + b  and Wr*xh_{t-1}
-                }
                 // zt = sigmoid()
                 // rt = sigmoid()
                 // mt = rt .* h_{t-1)
@@ -208,18 +188,15 @@ namespace caffe {
             m_t = m_data + m_.offset(t);
             zr_hat_t = zr_hat_data + zr_hat_.offset(t);
             gate_t = gate_data + zro_.offset(t);
-            h_to_gate_t = h_to_gate_m;
             o_hat_data_t = o_hat_data + o_hat_.offset(t);
 
-            h_t_1 = t > 0 ? (h_t - top_.offset(1)) : h_0_.cpu_data();
+            h_t_1 = t > 0 ? (top_data + top_.offset(t - 1)) : h_0_.cpu_data();
 
             // h_to_gate_m = W_om*mt
             caffe_cpu_gemm<Dtype>(CblasNoTrans, CblasTrans, N_, H_, H_, (Dtype) 1.,
                                   m_t, weight_om, (Dtype) 0., h_to_gate_m);
             for (int n = 0; n < N_; ++n) { //for batch
-                if (t > 0) {
-                    caffe_add(H_, o_hat_data_t, h_to_gate_t, o_hat_data_t); //W_om*mt + (Wox * xt + b)
-                }
+                caffe_add(H_, o_hat_data_t, h_to_gate_m, o_hat_data_t); //W_om*mt + (Wox * xt + b)
 
 //                std::cout<<"("<<t<<","<<n<<")  [";
                 for (int d = 0; d < H_; ++d) {//for dim
@@ -240,7 +217,6 @@ namespace caffe {
                 o_hat_data_t += H_;
                 zr_hat_t += 2 * H_;
                 gate_t += 3 * H_;
-                h_to_gate_t += H_;
             }
         }
 //        // Preserve output value for truncated BPTT
